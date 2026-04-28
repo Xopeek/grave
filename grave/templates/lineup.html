@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Schedule Games</title>
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --card: #ffffff;
+      --border: #d8deea;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --accent: #2563eb;
+      --shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+      --accepted: #16a34a;
+      --tentative: #d97706;
+      --waitlist: #dc2626;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .page {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .layout {
+      width: min(1400px, 100%);
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      align-items: flex-start;
+    }
+
+    .grid-wrap {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(240px, 1fr));
+      gap: 14px;
+      flex: 1 1 auto;
+      max-width: 1240px;
+      align-items: start;
+      grid-auto-rows: min-content;
+    }
+
+    .mini-table {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      align-self: start;
+    }
+
+    .mini-table__title {
+      padding: 10px 12px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    }
+
+    .cells {
+      display: grid;
+      grid-template-columns: 1fr;
+      width: 100%;
+    }
+
+    .cell {
+      height: 48px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      color: var(--muted);
+      background: #fff;
+    }
+
+    .cell:last-child {
+      border-bottom: none;
+    }
+
+    .side {
+      width: 360px;
+      flex: 0 0 360px;
+    }
+
+    .game-panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      padding: 18px;
+    }
+
+    .game-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: var(--text);
+    }
+
+    .game-select {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #fff;
+      font-size: 14px;
+      color: var(--text);
+      outline: none;
+      cursor: pointer;
+    }
+
+    .game-details {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .game-title {
+      margin: 0 0 10px;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #e8eefc;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .status-block {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .status-title {
+      margin: 0 0 8px;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .status-title.accepted { color: var(--accepted); }
+    .status-title.tentative { color: var(--tentative); }
+    .status-title.waitlist { color: var(--waitlist); }
+
+    .player-list {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 14px;
+    }
+
+    .player-list li {
+      margin-bottom: 4px;
+    }
+
+    .meta {
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .empty {
+      padding: 12px 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .placeholder {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 1200px) {
+      .layout {
+        flex-direction: column;
+      }
+
+      .side {
+        width: 100%;
+        flex-basis: auto;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .grid-wrap {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="layout">
+      <div class="grid-wrap" id="grid"></div>
+
+      <aside class="side">
+        <div class="game-panel">
+          <label class="game-label" for="gameSelect">Выберите игру</label>
+          <select class="game-select" id="gameSelect">
+            <option value="">Загрузка...</option>
+          </select>
+
+          <div class="game-details" id="gameDetails">
+            <div class="placeholder">Выберите игру из списка, чтобы увидеть участников.</div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    const grid = document.getElementById('grid');
+    const gameSelect = document.getElementById('gameSelect');
+    const gameDetails = document.getElementById('gameDetails');
+
+    const API_URL = "/lineup/api/game/";
+
+    const gamesCache = [];
+
+    for (let tableIndex = 1; tableIndex <= 12; tableIndex++) {
+      const table = document.createElement('section');
+      table.className = 'mini-table';
+
+      const title = document.createElement('div');
+      title.className = 'mini-table__title';
+      title.textContent = `Табличка ${tableIndex}`;
+      table.appendChild(title);
+
+      const cells = document.createElement('div');
+      cells.className = 'cells';
+
+      for (let cellIndex = 1; cellIndex <= 6; cellIndex++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.textContent = cellIndex;
+        cells.appendChild(cell);
+      }
+
+      table.appendChild(cells);
+      grid.appendChild(table);
+    }
+
+    function renderPlayers(players, status) {
+      const filtered = players.filter(player => player.status === status);
+
+      const block = document.createElement('div');
+      block.className = 'status-block';
+
+      const title = document.createElement('h4');
+      title.className = `status-title ${status}`;
+      title.textContent = `${status} (${filtered.length})`;
+      block.appendChild(title);
+
+      if (!filtered.length) {
+        const empty = document.createElement('div');
+        empty.className = 'empty';
+        empty.textContent = 'Нет игроков';
+        block.appendChild(empty);
+        return block;
+      }
+
+      const list = document.createElement('ul');
+      list.className = 'player-list';
+
+      filtered.forEach(player => {
+        const li = document.createElement('li');
+        li.textContent = player.name;
+        list.appendChild(li);
+      });
+
+      block.appendChild(list);
+      return block;
+    }
+
+    function renderSelectedGame(game) {
+      if (!game) {
+        gameDetails.innerHTML = '<div class="placeholder">Выберите игру из списка, чтобы увидеть участников.</div>';
+        return;
+      }
+
+      const inner = document.createElement('div');
+
+      const title = document.createElement('h3');
+      title.className = 'game-title';
+      title.textContent = game.name;
+      inner.appendChild(title);
+
+      const tagsWrap = document.createElement('div');
+      tagsWrap.className = 'tags';
+
+      (game.tags || []).forEach(tag => {
+        const span = document.createElement('span');
+        span.className = 'tag';
+        span.textContent = tag;
+        tagsWrap.appendChild(span);
+      });
+
+      inner.appendChild(tagsWrap);
+      inner.appendChild(renderPlayers(game.participants || [], 'accepted'));
+      inner.appendChild(renderPlayers(game.participants || [], 'tentative'));
+      inner.appendChild(renderPlayers(game.participants || [], 'waitlist'));
+
+      const meta = document.createElement('div');
+      meta.className = 'meta';
+      meta.textContent = `Создано: ${game.created_at}`;
+      inner.appendChild(meta);
+
+      gameDetails.innerHTML = '';
+      gameDetails.appendChild(inner);
+    }
+
+    function fillSelect(games) {
+      gameSelect.innerHTML = '';
+
+      const placeholderOption = document.createElement('option');
+      placeholderOption.value = '';
+      placeholderOption.textContent = 'Выберите игру';
+      gameSelect.appendChild(placeholderOption);
+
+      const activeGroup = document.createElement('optgroup');
+      activeGroup.label = 'Актуально';
+
+      const finishedGroup = document.createElement('optgroup');
+      finishedGroup.label = 'Закончено';
+
+      games.forEach((game, index) => {
+        const option = document.createElement('option');
+        option.value = String(index);
+        option.textContent = game.name;
+
+        const tags = Array.isArray(game.tags) ? game.tags : [];
+        const isFinished = tags.includes('Закончился') || tags.includes('Отмена');
+
+        if (isFinished) {
+          finishedGroup.appendChild(option);
+        } else {
+          activeGroup.appendChild(option);
+        }
+      });
+
+      if (activeGroup.children.length) {
+        gameSelect.appendChild(activeGroup);
+      }
+
+      if (finishedGroup.children.length) {
+        gameSelect.appendChild(finishedGroup);
+      }
+    }
+
+    async function loadGames() {
+      try {
+        const response = await fetch(API_URL, {
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        gamesCache.splice(0, gamesCache.length, ...data);
+        fillSelect(gamesCache);
+        gameDetails.innerHTML = '<div class="placeholder">Выберите игру из списка, чтобы увидеть участников.</div>';
+      } catch (error) {
+        gameSelect.innerHTML = '<option value="">Ошибка загрузки</option>';
+        gameDetails.innerHTML = `<div class="placeholder">Ошибка загрузки данных: ${error.message}</div>`;
+      }
+    }
+
+    gameSelect.addEventListener('change', () => {
+      const index = gameSelect.value;
+      if (index === '') {
+        renderSelectedGame(null);
+        return;
+      }
+      renderSelectedGame(gamesCache[Number(index)]);
+    });
+
+    loadGames();
+  </script>
+</body>
+</html>
