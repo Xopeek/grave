@@ -24,6 +24,12 @@ class DiscordChannel(Model):
 
 
 class ScheduleGame(Model):
+    FORMAT_CHOICES = [
+        ('20x20', '20x20'),
+        ('26x26', '26x26'),
+        ('30x30', '30x30'),
+        ('48x48', '48x48'),
+    ]
     discord_thread_id = models.BigIntegerField(
         'ID треда',
         unique=True
@@ -38,6 +44,18 @@ class ScheduleGame(Model):
     tags = models.TextField(
         'Тэги',
         blank=True,
+    )
+    game_format = models.CharField(
+        'Формат',
+        max_length=10,
+        choices=FORMAT_CHOICES,
+        default='20x20'
+    )
+    game_map = models.CharField(
+        'Карта',
+        max_length=255,
+        blank=True,
+        default=''
     )
     created_at = models.DateTimeField(
         'Дата создания'
@@ -83,3 +101,35 @@ class GameParticipant(Model):
 
     def __str__(self):
         return self.name
+
+
+class GameCellAssignment(Model):
+    game = models.ForeignKey(
+        ScheduleGame,
+        on_delete=models.CASCADE,
+        related_name='assignments'
+    )
+    participant = models.ForeignKey(
+        GameParticipant,
+        on_delete=models.CASCADE,
+        related_name='assignments'
+    )
+    cell_index = models.IntegerField(
+        'Индекс ячейки'
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['game', 'participant'],
+                name='unique_player_per_game'
+            ),
+            models.UniqueConstraint(
+                fields=['game', 'cell_index'],
+                name='unique_cell_per_game'
+            )
+        ]
+        verbose_name = 'Ячейки'
+
+    def __str__(self):
+        return f'{self.game} {self.participant} -> {self.cell_index}'

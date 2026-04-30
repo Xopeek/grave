@@ -11,5 +11,6 @@ router.register('api/game', views.ScheduleGameViewSet)
 
 urlpatterns = [
     path('games/', views.schedule_games_page),
+    path('api/assign/', views.GameAssignmentView.as_view()),
     path('', include(router.urls)),
 ]

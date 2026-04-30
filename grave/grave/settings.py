@@ -1,4 +1,9 @@
+import os
 from pathlib import Path
+
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -12,7 +17,7 @@ SECRET_KEY = 'django-insecure-f1-z@^qc-ef1&&krxac9vf7msp8a7feixumdz15j=f32m-dmep
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 # Application definition
 
@@ -25,6 +30,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'lineup.apps.LineupConfig',
+    'users.apps.UsersConfig',
+
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount.providers.discord',
 ]
 
 MIDDLEWARE = [
@@ -35,6 +45,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = 'grave.urls'
@@ -84,11 +95,25 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',],
+        'rest_framework.permissions.AllowAny', ],
 
     'DEFAULT_AUTHENTICATION_CLASSES': [],
+}
+
+SOCIALACCOUNT_PROVIDERS = {
+    'discord': {
+        'APP': {
+            'client_id': os.environ['DISCORD_CLIENT_ID'],
+            'secret': os.environ['DISCORD_CLIENT_SECRET'],
+        }
+    }
 }
 
 # Internationalization
@@ -105,4 +130,24 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]
+
+SESSION_COOKIE_DOMAIN = None  # для localhost достаточно None
+SESSION_COOKIE_SECURE = False  # разработка идёт по HTTP
+SESSION_COOKIE_SAMESITE = 'Lax'  # разрешает переходы по внешним ссылкам (Discord)
+SESSION_COOKIE_HTTPONLY = True  # безопасность
+CSRF_COOKIE_SECURE = False
+CSRF_COOKIE_SAMESITE = 'Lax'
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+
+DISCORD_AUTHORIZE_URL = 'https://discord.com/oauth2/authorize'
+DISCORD_TOKEN_URL = 'https://discord.com/api/oauth2/token'
+DISCORD_USER_URL = 'https://discord.com/api/v10/users/@me'
+DISCORD_SCOPE = 'identify'
+DISCORD_CLIENT_ID = os.environ['DISCORD_CLIENT_ID']
+DISCORD_CLIENT_SECRET = os.environ['DISCORD_CLIENT_SECRET']
+LOGIN_REDIRECT_URL = '/login/discord/callback/'
