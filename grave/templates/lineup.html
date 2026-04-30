@@ -1,0 +1,1422 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Schedule Games</title>
+    <style>
+        :root {
+          --bg: #f6f7fb;
+          --card: #ffffff;
+          --border: #d8deea;
+          --text: #1f2937;
+          --muted: #6b7280;
+          --accent: #2563eb;
+          --shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+          --accepted: #16a34a;
+          --tentative: #d97706;
+          --waitlist: #dc2626;
+          --drop: #dbeafe;
+          --chip-border: rgba(37, 99, 235, 0.16);
+        }
+
+        body[data-theme="dark"] {
+          --bg: #0b1220;
+          --card: #111827;
+          --border: #2a3447;
+          --text: #e5e7eb;
+          --muted: #9ca3af;
+          --accent: #60a5fa;
+          --shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+          --drop: #1f2937;
+          --chip-border: rgba(229, 231, 235, 0.45);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+          margin: 0;
+          min-height: 100vh;
+          font-family: Arial, Helvetica, sans-serif;
+          background: var(--bg);
+          color: var(--text);
+          display: flex;
+          flex-direction: column;
+        }
+
+        .page {
+          flex: 1 0 auto;
+          display: flex;
+          justify-content: center;
+          padding: 24px;
+        }
+
+        .site-header {
+          padding: 14px 24px;
+          background: var(--card);
+          border-bottom: 1px solid var(--border);
+          box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+        }
+
+        .site-header__inner {
+          width: min(1600px, 100%);
+          margin: 0 auto;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 16px;
+        }
+
+        .site-header__brand {
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .site-header__logo {
+          width: 44px;
+          height: 44px;
+          border-radius: 6px;
+          object-fit: cover;
+          border: 1px solid var(--border);
+          background: var(--card);
+        }
+
+        .site-header__title {
+          margin: 0;
+          font-size: 18px;
+          font-weight: 800;
+          color: var(--text);
+        }
+
+        .site-footer {
+          padding: 14px 24px;
+          background: var(--card);
+          border-top: 1px solid var(--border);
+          color: var(--muted);
+          font-size: 13px;
+          text-align: center;
+        }
+
+        .theme-toggle {
+          border: 1px solid var(--border);
+          background: transparent;
+          color: var(--text);
+          border-radius: 10px;
+          padding: 6px 12px;
+          font-size: 13px;
+          cursor: pointer;
+          transition: background 0.15s ease;
+        }
+
+        .theme-toggle:hover {
+          background: rgba(37, 99, 235, 0.12);
+        }
+
+        .layout {
+          width: min(1600px, 100%);
+          display: flex;
+          justify-content: center;
+          gap: 24px;
+          align-items: flex-start;
+        }
+
+        .grid-wrap {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(240px, 1fr));
+          grid-template-rows: repeat(2, minmax(32px, auto));
+          gap: 6px;
+          flex: 1 1 auto;
+          max-width: 1300px;
+          align-items: start;
+          grid-auto-rows: minmax(32px, auto);
+        }
+
+        .mini-table {
+          background: var(--card);
+          border: 1px solid var(--border);
+          border-radius: 16px;
+          box-shadow: var(--shadow);
+          overflow: hidden;
+          align-self: start;
+          transform: scale(0.97);
+          transform-origin: top left;
+        }
+
+        .mini-table__title {
+          padding: 8px 10px;
+          font-size: 13px;
+          font-weight: 700;
+          color: var(--muted);
+          border-bottom: 1px solid var(--border);
+          background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+        }
+
+        .cells {
+          display: grid;
+          grid-template-columns: 1fr;
+          width: 100%;
+        }
+
+        .cell {
+          min-height: 32px;
+          height: auto;
+          overflow: hidden;
+          border-bottom: 1px solid var(--border);
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          justify-content: flex-start;
+          padding: 2px 4px;
+          font-size: 11px;
+          color: var(--muted);
+          background: var(--card);
+          gap: 4px;
+          cursor: default;
+          transition: background 0.15s ease, border-color 0.15s ease;
+        }
+
+        .cell:last-child {
+          border-bottom: none;
+        }
+
+        .cell.drag-over {
+          background: var(--drop);
+          border-color: var(--accent);
+        }
+
+        .cell-number {
+          flex: 0 0 18px;
+          font-size: 12px;
+          font-weight: 700;
+          color: var(--muted);
+          line-height: 1;
+          user-select: none;
+        }
+
+        .cell-content {
+          flex: 1;
+          min-width: 0;
+          min-height: 22px;
+          display: flex;
+          flex-wrap: nowrap;
+          gap: 6px;
+          overflow: hidden;
+          align-items: center;
+        }
+
+        .cell.has-player .cell-number {
+          color: var(--accent);
+        }
+
+        .side {
+          width: 460px;
+          flex: 0 0 460px;
+        }
+
+        .game-panel {
+          background: var(--card);
+          border: 1px solid var(--border);
+          border-radius: 16px;
+          box-shadow: var(--shadow);
+          overflow: hidden;
+          padding: 18px;
+        }
+
+        .game-label {
+          display: block;
+          font-size: 14px;
+          font-weight: 700;
+          margin-bottom: 10px;
+          color: var(--text);
+        }
+
+        .game-select {
+          width: 100%;
+          padding: 12px 14px;
+          border: 1px solid var(--border);
+          border-radius: 12px;
+          background: var(--card);
+          font-size: 14px;
+          color: var(--text);
+          outline: none;
+          cursor: pointer;
+        }
+
+        .game-details {
+          margin-top: 16px;
+          padding-top: 16px;
+          border-top: 1px solid var(--border);
+        }
+
+        .game-title {
+          margin: 0 0 10px;
+          font-size: 16px;
+          font-weight: 700;
+          color: var(--text);
+          line-height: 1.4;
+        }
+
+        .tags {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          margin-bottom: 14px;
+        }
+
+        .tag {
+          display: inline-flex;
+          align-items: center;
+          padding: 4px 10px;
+          border-radius: 999px;
+          background: #e8eefc;
+          color: var(--accent);
+          font-size: 12px;
+          font-weight: 700;
+        }
+
+        .players-row {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 12px;
+          align-items: start;
+          margin-top: 8px;
+        }
+
+        .status-block {
+          min-width: 0;
+          margin-top: 12px;
+          padding: 12px;
+          border: 1px solid var(--border);
+          border-radius: 14px;
+          background: var(--card);
+          transition: background 0.15s ease, border-color 0.15s ease;
+        }
+
+        .status-block.drag-over {
+          background: var(--drop);
+          border-color: var(--accent);
+        }
+
+        .status-title {
+          margin: 0 0 8px;
+          font-size: 13px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+        }
+
+        .status-title.accepted { color: var(--accepted); }
+        .status-title.tentative { color: var(--tentative); }
+        .status-title.waitlist { color: var(--waitlist); }
+
+        .player-list {
+          margin: 0;
+          padding: 0;
+          list-style: none;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          color: var(--muted);
+          line-height: 1.55;
+          font-size: 14px;
+          min-height: 24px;
+        }
+
+        .player-list li {
+          margin: 0;
+          min-width: 0;
+          max-width: 100%;
+        }
+
+        .player-chip {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 6px 10px;
+          border-radius: 999px;
+          background: var(--card);
+          color: var(--text);
+          font-size: 12px;
+          font-weight: 700;
+          border: 1px solid var(--border);
+          cursor: grab;
+          user-select: none;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          word-break: break-word;
+          overflow-wrap: anywhere;
+          max-width: 100%;
+          text-align: left;
+          flex-shrink: 1;
+        }
+
+        .player-chip__name {
+          min-width: 0;
+          max-width: 100%;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .cell-content .player-chip.assigned {
+          width: 100%;
+          justify-content: space-between;
+          min-width: 0;
+        }
+
+        .cell-content .player-chip.assigned .player-chip__name {
+          flex: 1 1 auto;
+          min-width: 0;
+          max-width: calc(100% - 26px);
+        }
+
+        .player-chip__remove {
+          width: 20px;
+          height: 20px;
+          padding: 0;
+          border: 1px solid rgba(220, 38, 38, 0.45);
+          border-radius: 999px;
+          background: #dc2626;
+          color: #fff;
+          font-size: 14px;
+          font-weight: 700;
+          line-height: 1;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          flex: 0 0 20px;
+          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+          transition: filter 0.12s ease, transform 0.12s ease;
+        }
+
+        .player-chip__remove:hover {
+          filter: brightness(1.08);
+        }
+
+        .player-chip__remove:active {
+          transform: scale(0.94);
+        }
+
+        body[data-theme="dark"] .player-chip__remove {
+          background: #ef4444;
+          border-color: rgba(248, 113, 113, 0.55);
+          color: #fff;
+        }
+
+        .player-list .player-chip {
+          white-space: normal;
+          line-height: 1.3;
+          word-break: break-word;
+          overflow-wrap: anywhere;
+          max-width: 100%;
+        }
+
+        .player-chip:active {
+          cursor: grabbing;
+        }
+
+        .player-chip.accepted {
+          background: #ecfdf3;
+          color: var(--accepted);
+          border-color: rgba(22, 163, 74, 0.18);
+        }
+
+        .player-chip.tentative {
+          background: #fff7ed;
+          color: var(--tentative);
+          border-color: rgba(217, 119, 6, 0.18);
+        }
+
+        .player-chip.waitlist {
+          background: #fef2f2;
+          color: var(--waitlist);
+          border-color: rgba(220, 38, 38, 0.18);
+        }
+
+        .meta {
+          margin-top: 10px;
+          font-size: 12px;
+          color: var(--muted);
+        }
+
+        .empty {
+          padding: 12px 0 0;
+          color: var(--muted);
+          font-size: 14px;
+        }
+
+        .placeholder {
+          color: var(--muted);
+          font-size: 14px;
+          line-height: 1.5;
+        }
+
+        .counter-panel {
+          width: 200px;
+          flex: 0 0 200px;
+          background: var(--card);
+          border: 1px solid var(--border);
+          border-radius: 16px;
+          box-shadow: var(--shadow);
+          padding: 16px;
+          height: fit-content;
+          position: sticky;
+          top: 24px;
+        }
+
+        .counter-title {
+          font-size: 14px;
+          font-weight: 700;
+          margin-bottom: 10px;
+          color: var(--text);
+        }
+
+        .counter-value {
+          font-size: 28px;
+          font-weight: 800;
+          color: var(--accent);
+        }
+
+        .counter-select,
+        .counter-input {
+          width: 100%;
+          margin-top: 10px;
+          padding: 8px 10px;
+          border: 1px solid var(--border);
+          border-radius: 10px;
+          background: var(--card);
+          font-size: 13px;
+          color: var(--text);
+          outline: none;
+        }
+
+        .counter-input {
+          cursor: text;
+        }
+
+        .clear-button {
+          width: 100%;
+          margin-top: 12px;
+          padding: 10px 12px;
+          border: 1px solid rgba(220, 38, 38, 0.25);
+          border-radius: 10px;
+          background: #fef2f2;
+          color: #dc2626;
+          font-size: 13px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: background 0.15s ease, transform 0.15s ease;
+        }
+
+        .clear-button:hover {
+          background: #fee2e2;
+        }
+
+        .clear-button:active {
+          transform: translateY(1px);
+        }
+
+        .title-blue { color: #2563eb; }
+        .title-black { color: #111827; }
+        .title-red { color: #dc2626; }
+        .title-green { color: #16a34a; }
+        .title-pink { color: #db2777; }
+        .title-yellow { color: #ca8a04; }
+        .title-orange { color: #ea580c; }
+        .title-white { color: #6b7280; }
+        .title-cyan { color: #0891b2; }
+        .title-grey { color: #4b5563; }
+        .title-purple { color: #7c3aed; }
+        .title-heli { color: #0f766e; }
+
+        .mini-table__title.title-blue { background: rgba(37, 99, 235, 0.12); }
+        .mini-table__title.title-black { background: rgba(17, 24, 39, 0.10); }
+        .mini-table__title.title-red { background: rgba(220, 38, 38, 0.12); }
+        .mini-table__title.title-green { background: rgba(22, 163, 74, 0.12); }
+        .mini-table__title.title-pink { background: rgba(219, 39, 119, 0.12); }
+        .mini-table__title.title-yellow { background: rgba(202, 138, 4, 0.12); }
+        .mini-table__title.title-orange { background: rgba(234, 88, 12, 0.12); }
+        .mini-table__title.title-white { background: rgba(107, 114, 128, 0.10); }
+        .mini-table__title.title-cyan { background: rgba(8, 145, 178, 0.12); }
+        .mini-table__title.title-grey { background: rgba(75, 85, 99, 0.12); }
+        .mini-table__title.title-purple { background: rgba(124, 58, 237, 0.12); }
+        .mini-table__title.title-heli { background: rgba(15, 118, 110, 0.12); }
+
+        .player-chip.title-blue {
+          color: #2563eb;
+          background: rgba(37, 99, 235, 0.10);
+        }
+
+        .player-chip.title-red {
+          color: #dc2626;
+          background: rgba(220, 38, 38, 0.10);
+        }
+
+        .player-chip.title-green {
+          color: #16a34a;
+          background: rgba(22, 163, 74, 0.10);
+        }
+
+        .player-chip.title-yellow {
+          color: #ca8a04;
+          background: rgba(202, 138, 4, 0.10);
+        }
+
+        .player-chip.title-purple {
+          color: #7c3aed;
+          background: rgba(124, 58, 237, 0.10);
+        }
+
+        .player-chip.title-cyan {
+          color: #0891b2;
+          background: rgba(8, 145, 178, 0.10);
+        }
+
+        .player-chip.title-orange {
+          color: #ea580c;
+          background: rgba(234, 88, 12, 0.10);
+        }
+
+        .player-chip.title-heli {
+          color: #0f766e;
+          background: rgba(15, 118, 110, 0.10);
+        }
+
+        .player-chip.assigned {
+          background: transparent !important;
+        }
+
+        .player-chip.assigned.title-blue {
+          background: rgba(37, 99, 235, 0.15) !important;
+        }
+
+        .player-chip.assigned.title-red {
+          background: rgba(220, 38, 38, 0.15) !important;
+        }
+
+        .player-chip.assigned.title-green {
+          background: rgba(22, 163, 74, 0.15) !important;
+        }
+
+        .player-chip.assigned.title-black {
+          background: rgba(17, 24, 39, 0.12) !important;
+        }
+
+        .player-chip.assigned.title-white {
+          background: rgba(107, 114, 128, 0.12) !important;
+        }
+
+        .player-chip.accepted {
+          border-left: 3px solid #16a34a;
+        }
+
+        .player-chip.tentative {
+          border-left: 3px solid #d97706;
+        }
+
+        .player-chip.waitlist {
+          border-left: 3px solid #dc2626;
+        }
+
+        .game-field-block {
+          margin-top: 14px;
+          padding-top: 14px;
+          border-top: 1px solid var(--border);
+        }
+
+        .game-field-label {
+          display: block;
+          font-size: 13px;
+          font-weight: 700;
+          margin-bottom: 8px;
+          color: var(--text);
+        }
+
+        .game-field-input {
+          width: 100%;
+          padding: 10px 12px;
+          border: 1px solid var(--border);
+          border-radius: 12px;
+          background: var(--card);
+          font-size: 14px;
+          color: var(--text);
+          outline: none;
+        }
+
+        @media (max-width: 1200px) {
+          .layout {
+            flex-direction: column;
+          }
+
+          .side {
+            width: 100%;
+            flex-basis: auto;
+          }
+        }
+
+        @media (max-width: 900px) {
+          .grid-wrap {
+            grid-template-columns: 1fr;
+          }
+
+          .players-row {
+            grid-template-columns: 1fr;
+          }
+        }
+    </style>
+</head>
+<body>
+{% include "partials/site_header.html" %}
+<div class="page">
+    <div class="layout">
+        <div class="counter-panel" id="counterPanel">
+            <div class="counter-title">Заполнено ячеек</div>
+            <div class="counter-value" id="counterValue">0</div>
+
+            <label class="counter-title" for="formatSelect" style="display:block; margin-top:14px; margin-bottom:6px;">
+                Выбор формата
+            </label>
+            <select class="counter-select" id="formatSelect">
+                <option value="20x20">20x20</option>
+                <option value="26x26">26x26</option>
+                <option value="30x30">30x30</option>
+                <option value="48x48">48x48</option>
+            </select>
+
+            <div class="game-field-block">
+                <label class="game-field-label" for="gameNoteInput">Карта</label>
+                <input
+                    class="game-field-input"
+                    id="gameNoteInput"
+                    type="text"
+                    placeholder="Введите значение"
+                    autocomplete="off"
+                />
+            </div>
+
+            <button type="button" class="clear-button" id="clearButton">Очистить</button>
+        </div>
+
+        <div class="grid-wrap" id="grid"></div>
+
+        <aside class="side">
+            <div class="game-panel">
+                <label class="game-label" for="gameSelect">Выберите игру</label>
+                <select class="game-select" id="gameSelect">
+                    <option value="">Загрузка...</option>
+                </select>
+
+                <div class="game-details" id="gameDetails">
+                    <div class="placeholder">Выберите игру из списка, чтобы увидеть участников.</div>
+                </div>
+            </div>
+        </aside>
+    </div>
+</div>
+{% include "partials/site_footer.html" %}
+
+<script>
+    const grid = document.getElementById('grid');
+    const gameSelect = document.getElementById('gameSelect');
+    const gameDetails = document.getElementById('gameDetails');
+    const clearButton = document.getElementById('clearButton');
+
+    const API_URL = "/lineup/api/game/";
+    const ASSIGN_API_URL = "/lineup/api/assign/";
+    const gamesCache = [];
+
+    const tableNames = [
+      'BLUE',
+      'PURPLE',
+      'RED',
+      'GREEN',
+      'PINK',
+      'YELLOW',
+      'ORANGE',
+      'CYAN'
+    ];
+
+    let currentGame = null;
+    let currentPlayers = [];
+    let playersByKey = new Map();
+    let assignmentsByPlayerKey = {};
+    let assignmentByCellIndex = {};
+    const formatOptions = ['20x20', '26x26', '30x30', '48x48'];
+
+    const counterValue = document.getElementById('counterValue');
+    const formatSelect = document.getElementById('formatSelect');
+    const gameNoteInput = document.getElementById('gameNoteInput');
+    const themeToggle = document.getElementById('themeToggle');
+    let gameNoteSaveTimer = null;
+
+    function getTableColor(cellIndex) {
+      const tableIndex = Math.floor(cellIndex / 6);
+      return tableNames[tableIndex].toLowerCase();
+    }
+
+    function updateCounter() {
+      const filled = Object.keys(assignmentByCellIndex).length;
+      const selectedFormat = formatSelect.value || formatOptions[0];
+      const formatSize = selectedFormat.split('x')[0];
+      counterValue.textContent = `${filled}/${formatSize}`;
+    }
+
+    function initFormatSelect() {
+      formatSelect.innerHTML = formatOptions
+        .map((format) => `<option value="${format}">${format}</option>`)
+        .join('');
+    }
+
+    function applyTheme(theme) {
+      const normalizedTheme = theme === 'dark' ? 'dark' : 'light';
+      document.body.dataset.theme = normalizedTheme;
+      if (themeToggle) {
+        themeToggle.textContent = normalizedTheme === 'dark' ? 'Светлая тема' : 'Тёмная тема';
+      }
+    }
+
+    function initTheme() {
+      const savedTheme = localStorage.getItem('site-theme');
+      applyTheme(savedTheme || 'light');
+    }
+
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+
+    const csrftoken = getCookie('csrftoken');
+
+    function getPlayerKey(player, status, index) {
+      if (player && player.id !== undefined && player.id !== null) {
+        return String(player.id);
+      }
+      return `${status}:${index}:${player.name}`;
+    }
+
+    function clearAssignments() {
+      assignmentsByPlayerKey = {};
+      assignmentByCellIndex = {};
+    }
+
+    function buildPlayersIndex(game) {
+      currentPlayers = [];
+      playersByKey = new Map();
+
+      const participants = Array.isArray(game?.participants) ? game.participants : [];
+
+      participants.forEach((player, index) => {
+        const status = player.status || 'unknown';
+        const key = getPlayerKey(player, status, index);
+        const item = {
+          ...player,
+          _key: key,
+          _status: status
+        };
+        currentPlayers.push(item);
+        playersByKey.set(key, item);
+      });
+    }
+
+    function syncGameAssignmentsFromState() {
+      if (!currentGame) return;
+
+      currentGame.assignments = Object.keys(assignmentsByPlayerKey).map((participantId) => ({
+        participant_id: Number(participantId),
+        cell_index: assignmentsByPlayerKey[participantId]
+      }));
+    }
+
+    function loadAssignmentsFromGame(game) {
+      clearAssignments();
+
+      const assignments = Array.isArray(game?.assignments) ? game.assignments : [];
+      assignments.forEach((assignment) => {
+        const participantId = assignment.participant_id ?? assignment.participant?.id;
+        const cellIndex = assignment.cell_index;
+
+        if (participantId === undefined || participantId === null || cellIndex === undefined || cellIndex === null) {
+          return;
+        }
+
+        const key = String(participantId);
+        if (!playersByKey.has(key)) return;
+
+        assignmentsByPlayerKey[key] = cellIndex;
+        assignmentByCellIndex[cellIndex] = key;
+      });
+    }
+
+    function createPlayerChip(player, isAssigned, tableColor = null) {
+      const chip = document.createElement('span');
+
+      const statusClass = player._status || '';
+      const tableClass = tableColor ? `title-${tableColor}` : '';
+
+      if (isAssigned) {
+        chip.className = `player-chip assigned ${tableClass}`;
+      } else {
+        chip.className = `player-chip ${tableClass}`;
+      }
+
+      chip.draggable = true;
+      chip.dataset.playerKey = player._key;
+
+      const nameText = document.createElement('span');
+      nameText.className = 'player-chip__name';
+      nameText.textContent = player.name;
+      chip.appendChild(nameText);
+
+      if (isAssigned) {
+        const removeButton = document.createElement('button');
+        removeButton.type = 'button';
+        removeButton.className = 'player-chip__remove';
+        removeButton.textContent = '×';
+        removeButton.title = 'Убрать из таблицы';
+
+        removeButton.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          unassignPlayer(player._key);
+        });
+
+        chip.appendChild(removeButton);
+      }
+
+      chip.addEventListener('dragstart', (e) => {
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', player._key);
+      });
+
+      return chip;
+    }
+
+    function renderGrid() {
+      grid.innerHTML = '';
+
+      for (let tableIndex = 0; tableIndex < tableNames.length; tableIndex++) {
+        const table = document.createElement('section');
+        table.className = 'mini-table';
+
+        const title = document.createElement('div');
+        title.className = 'mini-table__title';
+        const name = tableNames[tableIndex].toLowerCase();
+
+        title.textContent = tableNames[tableIndex];
+        title.classList.add(`title-${name}`);
+        table.appendChild(title);
+
+        const cells = document.createElement('div');
+        cells.className = 'cells';
+
+        for (let cellIndex = 1; cellIndex <= 6; cellIndex++) {
+          const globalCellIndex = tableIndex * 6 + (cellIndex - 1);
+
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          cell.dataset.cellIndex = String(globalCellIndex);
+
+          const number = document.createElement('div');
+          number.className = 'cell-number';
+          number.textContent = cellIndex;
+
+          const content = document.createElement('div');
+          content.className = 'cell-content';
+
+          const assignedKey = assignmentByCellIndex[globalCellIndex];
+          if (assignedKey && playersByKey.has(assignedKey)) {
+            const player = playersByKey.get(assignedKey);
+            const color = getTableColor(globalCellIndex);
+            content.appendChild(createPlayerChip(player, true, color));
+            cell.classList.add('has-player');
+          }
+
+          cell.appendChild(number);
+          cell.appendChild(content);
+
+          cell.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            cell.classList.add('drag-over');
+          });
+
+          cell.addEventListener('dragleave', () => {
+            cell.classList.remove('drag-over');
+          });
+
+          cell.addEventListener('drop', (e) => {
+            e.preventDefault();
+            cell.classList.remove('drag-over');
+
+            const playerKey = e.dataTransfer.getData('text/plain');
+            if (!playerKey || !playersByKey.has(playerKey)) return;
+
+            assignPlayerToCell(playerKey, globalCellIndex);
+          });
+
+          cells.appendChild(cell);
+        }
+
+        table.appendChild(cells);
+        grid.appendChild(table);
+        updateCounter();
+      }
+    }
+
+    function renderPlayers(players, status) {
+      const filtered = players.filter(player => player._status === status);
+
+      const block = document.createElement('div');
+      block.className = 'status-block';
+
+      const title = document.createElement('h4');
+      title.className = `status-title ${status}`;
+      title.textContent = `${status} (${filtered.length})`;
+      block.appendChild(title);
+
+      block.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        block.classList.add('drag-over');
+      });
+
+      block.addEventListener('dragleave', () => {
+        block.classList.remove('drag-over');
+      });
+
+      block.addEventListener('drop', (e) => {
+        e.preventDefault();
+        block.classList.remove('drag-over');
+
+        const playerKey = e.dataTransfer.getData('text/plain');
+        if (!playerKey || !playersByKey.has(playerKey)) return;
+
+        unassignPlayer(playerKey);
+      });
+
+      if (!filtered.length) {
+        const empty = document.createElement('div');
+        empty.className = 'empty';
+        empty.textContent = 'Нет игроков';
+        block.appendChild(empty);
+        return block;
+      }
+
+      const list = document.createElement('ul');
+      list.className = 'player-list';
+
+      filtered.forEach(player => {
+        const li = document.createElement('li');
+        const assignedCellIndex = assignmentsByPlayerKey[player._key];
+        const assignedTableColor = assignedCellIndex !== undefined
+          ? getTableColor(assignedCellIndex)
+          : null;
+
+        li.appendChild(createPlayerChip(player, false, assignedTableColor));
+        list.appendChild(li);
+      });
+
+      block.appendChild(list);
+      return block;
+    }
+
+    function renderGameDetails() {
+      if (!currentGame) {
+        gameDetails.innerHTML = '<div class="placeholder">Выберите игру из списка, чтобы увидеть участников.</div>';
+        return;
+      }
+
+      const inner = document.createElement('div');
+
+      const title = document.createElement('h3');
+      title.className = 'game-title';
+      title.textContent = currentGame.name;
+      inner.appendChild(title);
+
+      const tagsWrap = document.createElement('div');
+      tagsWrap.className = 'tags';
+
+      (currentGame.tags || []).forEach(tag => {
+        const span = document.createElement('span');
+        span.className = 'tag';
+        span.textContent = tag;
+        tagsWrap.appendChild(span);
+      });
+
+      inner.appendChild(tagsWrap);
+
+      const playersRow = document.createElement('div');
+      playersRow.className = 'players-row';
+
+      playersRow.appendChild(renderPlayers(currentPlayers, 'accepted'));
+      playersRow.appendChild(renderPlayers(currentPlayers, 'tentative'));
+      playersRow.appendChild(renderPlayers(currentPlayers, 'waitlist'));
+
+      inner.appendChild(playersRow);
+
+      const meta = document.createElement('div');
+      meta.className = 'meta';
+      meta.textContent = `Создано: ${currentGame.created_at}`;
+      inner.appendChild(meta);
+
+      gameDetails.innerHTML = '';
+      gameDetails.appendChild(inner);
+    }
+
+    function renderSelectedGame(game) {
+      currentGame = game;
+
+      if (!game) {
+        currentPlayers = [];
+        playersByKey = new Map();
+        clearAssignments();
+        formatSelect.value = formatOptions[0];
+        gameNoteInput.value = '';
+        renderGrid();
+        renderGameDetails();
+        updateCounter();
+        return;
+      }
+
+      buildPlayersIndex(game);
+      loadAssignmentsFromGame(game);
+      formatSelect.value = game.game_format || formatOptions[0];
+      gameNoteInput.value = game.game_map || '';
+      renderGrid();
+      renderGameDetails();
+      updateCounter();
+    }
+
+    function redrawCurrentGame() {
+      if (!currentGame) return;
+      renderGrid();
+      renderGameDetails();
+    }
+
+    async function saveAssignmentToServer(playerKey, cellIndex) {
+      const response = await fetch(ASSIGN_API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-CSRFToken': csrftoken
+        },
+        body: JSON.stringify({
+          game_id: currentGame.id,
+          participant_id: Number(playerKey),
+          cell_index: cellIndex
+        })
+      });
+
+      if (!response.ok) {
+        let message = `HTTP ${response.status}`;
+        try {
+          const data = await response.json();
+          if (data && data.error) {
+            message = data.error;
+          }
+        } catch (e) {}
+        throw new Error(message);
+      }
+    }
+
+    async function saveGameFieldToServer(payload) {
+      const response = await fetch(`${API_URL}${currentGame.id}/`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-CSRFToken': csrftoken
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        let message = `HTTP ${response.status}`;
+        try {
+          const data = await response.json();
+          if (data && data.error) {
+            message = data.error;
+          }
+        } catch (e) {}
+        throw new Error(message);
+      }
+
+      const updatedGame = await response.json();
+
+      if (Object.prototype.hasOwnProperty.call(updatedGame, 'game_format')) {
+        currentGame.game_format = updatedGame.game_format;
+      }
+
+      if (Object.prototype.hasOwnProperty.call(updatedGame, 'game_map')) {
+        currentGame.game_map = updatedGame.game_map;
+      }
+
+      const cacheIndex = gamesCache.findIndex((g) => g.id === currentGame.id);
+      if (cacheIndex !== -1) {
+        gamesCache[cacheIndex] = {
+          ...gamesCache[cacheIndex],
+          game_format: currentGame.game_format,
+          game_map: currentGame.game_map
+        };
+      }
+    }
+
+    async function saveGameFormatToServer(gameFormat) {
+      await saveGameFieldToServer({ game_format: gameFormat });
+    }
+
+    async function saveGameNoteToServer(gameNote) {
+      await saveGameFieldToServer({ game_map: gameNote });
+    }
+
+    function snapshotState() {
+      return {
+        assignmentsByPlayerKey: { ...assignmentsByPlayerKey },
+        assignmentByCellIndex: { ...assignmentByCellIndex }
+      };
+    }
+
+    function restoreState(snapshot) {
+      assignmentsByPlayerKey = { ...snapshot.assignmentsByPlayerKey };
+      assignmentByCellIndex = { ...snapshot.assignmentByCellIndex };
+      syncGameAssignmentsFromState();
+    }
+
+    async function assignPlayerToCell(playerKey, cellIndex) {
+      const previousSnapshot = snapshotState();
+
+      const previousCell = assignmentsByPlayerKey[playerKey];
+      if (previousCell !== undefined) {
+        delete assignmentByCellIndex[previousCell];
+      }
+
+      const occupantKey = assignmentByCellIndex[cellIndex];
+      if (occupantKey && occupantKey !== playerKey) {
+        delete assignmentsByPlayerKey[occupantKey];
+      }
+
+      assignmentsByPlayerKey[playerKey] = cellIndex;
+      assignmentByCellIndex[cellIndex] = playerKey;
+      syncGameAssignmentsFromState();
+      redrawCurrentGame();
+      updateCounter();
+
+      try {
+        await saveAssignmentToServer(playerKey, cellIndex);
+      } catch (error) {
+        console.error(error);
+        restoreState(previousSnapshot);
+        redrawCurrentGame();
+        alert(`Не удалось сохранить расстановку: ${error.message}`);
+      }
+    }
+
+    async function unassignPlayer(playerKey) {
+      const cellIndex = assignmentsByPlayerKey[playerKey];
+      if (cellIndex === undefined) return;
+
+      const previousSnapshot = snapshotState();
+
+      delete assignmentsByPlayerKey[playerKey];
+      delete assignmentByCellIndex[cellIndex];
+      syncGameAssignmentsFromState();
+      redrawCurrentGame();
+      updateCounter();
+
+      try {
+        await saveAssignmentToServer(playerKey, null);
+      } catch (error) {
+        console.error(error);
+        restoreState(previousSnapshot);
+        redrawCurrentGame();
+        alert(`Не удалось сохранить расстановку: ${error.message}`);
+      }
+    }
+
+    async function clearAllTables() {
+      if (!currentGame) return;
+
+      const assignedKeys = Object.keys(assignmentsByPlayerKey);
+      if (!assignedKeys.length) return;
+
+      const confirmed = confirm('Очистить все таблицы в этой игре?');
+      if (!confirmed) return;
+
+      const previousSnapshot = snapshotState();
+
+      clearAssignments();
+      syncGameAssignmentsFromState();
+      redrawCurrentGame();
+      updateCounter();
+
+      try {
+        for (const playerKey of assignedKeys) {
+          await saveAssignmentToServer(playerKey, null);
+        }
+      } catch (error) {
+        console.error(error);
+        restoreState(previousSnapshot);
+        redrawCurrentGame();
+        updateCounter();
+        alert(`Не удалось очистить таблицы: ${error.message}`);
+      }
+    }
+
+    function fillSelect(games) {
+      gameSelect.innerHTML = '';
+
+      const placeholderOption = document.createElement('option');
+      placeholderOption.value = '';
+      placeholderOption.textContent = 'Выберите игру';
+      gameSelect.appendChild(placeholderOption);
+
+      const activeGroup = document.createElement('optgroup');
+      activeGroup.label = 'Актуально';
+
+      const finishedGroup = document.createElement('optgroup');
+      finishedGroup.label = 'Закончено';
+
+      games.forEach((game, index) => {
+        const option = document.createElement('option');
+        option.value = String(index);
+        option.textContent = game.name;
+
+        const tags = Array.isArray(game.tags) ? game.tags : [];
+        const isFinished = tags.includes('Закончился') || tags.includes('Отмена');
+
+        if (isFinished) {
+          finishedGroup.appendChild(option);
+        } else {
+          activeGroup.appendChild(option);
+        }
+      });
+
+      if (activeGroup.children.length) {
+        gameSelect.appendChild(activeGroup);
+      }
+
+      if (finishedGroup.children.length) {
+        gameSelect.appendChild(finishedGroup);
+      }
+    }
+
+    async function loadGames() {
+      try {
+        const response = await fetch(API_URL, {
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        gamesCache.splice(0, gamesCache.length, ...data);
+        fillSelect(gamesCache);
+        renderSelectedGame(null);
+      } catch (error) {
+        gameSelect.innerHTML = '<option value="">Ошибка загрузки</option>';
+        gameDetails.innerHTML = `<div class="placeholder">Ошибка загрузки данных: ${error.message}</div>`;
+      }
+    }
+
+    gameSelect.addEventListener('change', () => {
+      const index = gameSelect.value;
+      if (index === '') {
+        renderSelectedGame(null);
+        return;
+      }
+      renderSelectedGame(gamesCache[Number(index)]);
+    });
+
+    formatSelect.addEventListener('change', async () => {
+      updateCounter();
+
+      if (!currentGame) return;
+
+      const previousFormat = currentGame.game_format || formatOptions[0];
+      const newFormat = formatSelect.value;
+
+      currentGame.game_format = newFormat;
+
+      try {
+        await saveGameFormatToServer(newFormat);
+      } catch (error) {
+        console.error(error);
+        currentGame.game_format = previousFormat;
+        formatSelect.value = previousFormat;
+        alert(`Не удалось сохранить формат: ${error.message}`);
+      }
+    });
+
+    gameNoteInput.addEventListener('input', () => {
+      if (!currentGame) return;
+
+      if (gameNoteSaveTimer) {
+        clearTimeout(gameNoteSaveTimer);
+      }
+
+      gameNoteSaveTimer = setTimeout(async () => {
+        const previousValue = currentGame.game_map || '';
+        const newValue = gameNoteInput.value;
+
+        currentGame.game_map = newValue;
+
+        try {
+          await saveGameNoteToServer(newValue);
+        } catch (error) {
+          console.error(error);
+          currentGame.game_map = previousValue;
+          gameNoteInput.value = previousValue;
+          alert(`Не удалось сохранить значение поля: ${error.message}`);
+        }
+      }, 400);
+    });
+
+    gameNoteInput.addEventListener('blur', async () => {
+      if (!currentGame) return;
+
+      if (gameNoteSaveTimer) {
+        clearTimeout(gameNoteSaveTimer);
+        gameNoteSaveTimer = null;
+      }
+
+      try {
+        await saveGameNoteToServer(gameNoteInput.value);
+      } catch (error) {
+        console.error(error);
+        alert(`Не удалось сохранить значение поля: ${error.message}`);
+      }
+    });
+
+    if (themeToggle) {
+      themeToggle.addEventListener('click', () => {
+        const nextTheme = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
+        applyTheme(nextTheme);
+        localStorage.setItem('site-theme', nextTheme);
+      });
+    }
+
+    clearButton.addEventListener('click', clearAllTables);
+
+    initTheme();
+    initFormatSelect();
+    updateCounter();
+    loadGames();
+</script>
+</body>
+</html>

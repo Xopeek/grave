@@ -1,0 +1,169 @@
+{% load static %}
+<header class="site-header">
+    <div class="site-header__inner">
+        <div class="site-header__brand">
+            <img class="site-header__logo" src="{% static 'img/logo.jpg' %}" alt="Логотип"/>
+            <h1 class="site-header__title">Lineup</h1>
+        </div>
+        <div class="site-header__actions">
+            <button class="theme-toggle" id="themeToggle" type="button">Тёмная тема</button>
+
+            {% if request.user.is_authenticated %}
+                <div class="user-menu" id="userMenu">
+                <button class="discord-user-badge user-menu__trigger" id="userMenuTrigger" type="button" aria-haspopup="true" aria-expanded="false">
+                    {% if header_avatar_url %}
+                        <img class="discord-user-avatar" src="{{ header_avatar_url }}" alt="Аватар"/>
+                    {% else %}
+                        <div class="discord-user-avatar discord-user-avatar--placeholder">
+                            {{ header_display_name|default:request.user.username|slice:":1"|upper }}
+                        </div>
+                    {% endif %}
+                    <span class="discord-user-name">{{ header_display_name|default:request.user.username }}</span>
+                </button>
+                <div class="user-menu__dropdown" id="userMenuDropdown">
+                    <form method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="user-menu__logout-button">Выход</button>
+                    </form>
+                </div>
+                </div>
+            {% else %}
+                <a href="{% url 'discord_login' %}?next={{ '/lineup/games/'|urlencode }}" class="discord-login-button">
+                    Войти через Discord
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <style>
+        .site-header__actions {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .discord-login-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 14px;
+            border-radius: 12px;
+            background: #5865f2;
+            color: #fff;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 14px;
+            transition: transform 0.15s ease, opacity 0.15s ease;
+        }
+
+        .discord-login-button:hover {
+            opacity: 0.92;
+            transform: translateY(-1px);
+        }
+
+        .discord-user-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            background: var(--card);
+            color: var(--text);
+            min-width: 0;
+        }
+
+        .user-menu__trigger {
+            cursor: pointer;
+        }
+
+        .user-menu {
+            position: relative;
+        }
+
+        .user-menu__dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            min-width: 140px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+            padding: 6px;
+            display: none;
+            z-index: 10;
+        }
+
+        .user-menu__dropdown.is-open {
+            display: block;
+        }
+
+        .user-menu__logout-button {
+            width: 100%;
+            border: none;
+            background: transparent;
+            color: var(--text);
+            font-size: 14px;
+            text-align: left;
+            padding: 8px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .user-menu__logout-button:hover {
+            background: rgba(220, 38, 38, 0.12);
+            color: #dc2626;
+        }
+
+        .discord-user-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 999px;
+            object-fit: cover;
+            flex: 0 0 28px;
+            border: 1px solid var(--border);
+        }
+
+        .discord-user-avatar--placeholder {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 800;
+            background: rgba(88, 101, 242, 0.14);
+            color: #5865f2;
+        }
+
+        .discord-user-name {
+            font-size: 13px;
+            font-weight: 700;
+            line-height: 1;
+            min-width: 0;
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    </style>
+    <script>
+        (function() {
+            const menu = document.getElementById('userMenu');
+            const trigger = document.getElementById('userMenuTrigger');
+            const dropdown = document.getElementById('userMenuDropdown');
+
+            if (!menu || !trigger || !dropdown) return;
+
+            trigger.addEventListener('click', function() {
+                const isOpen = dropdown.classList.toggle('is-open');
+                trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            });
+
+            document.addEventListener('click', function(event) {
+                if (menu.contains(event.target)) return;
+                dropdown.classList.remove('is-open');
+                trigger.setAttribute('aria-expanded', 'false');
+            });
+        })();
+    </script>
+</header>
