@@ -6,12 +6,11 @@
             <h1 class="site-header__title">Lineup</h1>
         </div>
         <div class="site-header__actions">
-            {{ request.user }}
-            {{ request.user.is_authenticated }}
             <button class="theme-toggle" id="themeToggle" type="button">Тёмная тема</button>
 
             {% if request.user.is_authenticated %}
-                <div class="discord-user-badge">
+                <div class="user-menu" id="userMenu">
+                <button class="discord-user-badge user-menu__trigger" id="userMenuTrigger" type="button" aria-haspopup="true" aria-expanded="false">
                     {% if header_avatar_url %}
                         <img class="discord-user-avatar" src="{{ header_avatar_url }}" alt="Аватар"/>
                     {% else %}
@@ -20,9 +19,16 @@
                         </div>
                     {% endif %}
                     <span class="discord-user-name">{{ header_display_name|default:request.user.username }}</span>
+                </button>
+                <div class="user-menu__dropdown" id="userMenuDropdown">
+                    <form method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="user-menu__logout-button">Выход</button>
+                    </form>
+                </div>
                 </div>
             {% else %}
-                <a href="{% url 'discord_login' %}?next={{ 'http://127.0.0.1:8000/login/discord/callback/'|urlencode }}" class="discord-login-button">
+                <a href="{% url 'discord_login' %}?next={{ '/lineup/games/'|urlencode }}" class="discord-login-button">
                     Войти через Discord
                 </a>
             {% endif %}
@@ -67,6 +73,49 @@
             min-width: 0;
         }
 
+        .user-menu__trigger {
+            cursor: pointer;
+        }
+
+        .user-menu {
+            position: relative;
+        }
+
+        .user-menu__dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            min-width: 140px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+            padding: 6px;
+            display: none;
+            z-index: 10;
+        }
+
+        .user-menu__dropdown.is-open {
+            display: block;
+        }
+
+        .user-menu__logout-button {
+            width: 100%;
+            border: none;
+            background: transparent;
+            color: var(--text);
+            font-size: 14px;
+            text-align: left;
+            padding: 8px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .user-menu__logout-button:hover {
+            background: rgba(220, 38, 38, 0.12);
+            color: #dc2626;
+        }
+
         .discord-user-avatar {
             width: 28px;
             height: 28px;
@@ -97,4 +146,24 @@
             text-overflow: ellipsis;
         }
     </style>
+    <script>
+        (function() {
+            const menu = document.getElementById('userMenu');
+            const trigger = document.getElementById('userMenuTrigger');
+            const dropdown = document.getElementById('userMenuDropdown');
+
+            if (!menu || !trigger || !dropdown) return;
+
+            trigger.addEventListener('click', function() {
+                const isOpen = dropdown.classList.toggle('is-open');
+                trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            });
+
+            document.addEventListener('click', function(event) {
+                if (menu.contains(event.target)) return;
+                dropdown.classList.remove('is-open');
+                trigger.setAttribute('aria-expanded', 'false');
+            });
+        })();
+    </script>
 </header>

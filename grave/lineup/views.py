@@ -78,17 +78,5 @@ def schedule_games_page(request):
             'header_display_name': display_name,
             'header_avatar_url': avatar_url,
         })
-    print("Host:", request.get_host())
-    print("Scheme:", request.scheme)
-    session_cookie = request.COOKIES.get('sessionid')
-    if session_cookie:
-        exists = Session.objects.filter(session_key=session_cookie).exists()
-        print(f"Session from cookie '{session_cookie}' exists in DB: {exists}")
-    print("USER:", request.user)
-    print("AUTH:", request.user.is_authenticated)
-    print("SESSION:", request.session.session_key)
-
-    print("Cookies:", request.COOKIES)
-    print("Session key from request:", request.session.session_key)
 
     return render(request, 'lineup.html', context)

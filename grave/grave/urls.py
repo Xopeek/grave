@@ -7,8 +7,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('lineup/', include('lineup.urls')),
     path('login/', include('users.urls')),
-    path('accounts/', include('allauth.urls')),
-    path('discord/login/callback/')
+    #path('accounts/', include('allauth.urls')),
+    #path('discord/login/callback/')
 ]
 
 if settings.DEBUG:

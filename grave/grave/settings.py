@@ -32,9 +32,6 @@ INSTALLED_APPS = [
     'lineup.apps.LineupConfig',
     'users.apps.UsersConfig',
 
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount.providers.discord',
 ]
 
 MIDDLEWARE = [
@@ -45,7 +42,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = 'grave.urls'
@@ -97,7 +93,6 @@ AUTH_PASSWORD_VALIDATORS = [
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
-    'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
 REST_FRAMEWORK = {
@@ -105,15 +100,6 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.AllowAny', ],
 
     'DEFAULT_AUTHENTICATION_CLASSES': [],
-}
-
-SOCIALACCOUNT_PROVIDERS = {
-    'discord': {
-        'APP': {
-            'client_id': os.environ['DISCORD_CLIENT_ID'],
-            'secret': os.environ['DISCORD_CLIENT_SECRET'],
-        }
-    }
 }
 
 # Internationalization
@@ -150,4 +136,4 @@ DISCORD_USER_URL = 'https://discord.com/api/v10/users/@me'
 DISCORD_SCOPE = 'identify'
 DISCORD_CLIENT_ID = os.environ['DISCORD_CLIENT_ID']
 DISCORD_CLIENT_SECRET = os.environ['DISCORD_CLIENT_SECRET']
-LOGIN_REDIRECT_URL = '/login/discord/callback/'
+LOGIN_REDIRECT_URL = '/lineup/games/'
