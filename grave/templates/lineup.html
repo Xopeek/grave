@@ -51,6 +51,24 @@
           padding: 24px;
         }
 
+        .auth-required {
+          flex: 1 0 auto;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 24px;
+        }
+
+        .auth-required__message {
+          margin: 0;
+          font-size: 24px;
+          font-weight: 700;
+          color: var(--text);
+          text-align: center;
+          max-width: 760px;
+          line-height: 1.35;
+        }
+
         .site-header {
           padding: 14px 24px;
           background: var(--card);
@@ -119,17 +137,66 @@
           justify-content: center;
           gap: 24px;
           align-items: flex-start;
+          min-width: 0;
         }
 
         .grid-wrap {
           display: grid;
-          grid-template-columns: repeat(4, minmax(240px, 1fr));
-          grid-template-rows: repeat(2, minmax(32px, auto));
+          grid-template-columns: repeat(6, minmax(0, 1fr));
           gap: 6px;
           flex: 1 1 auto;
           max-width: 1300px;
           align-items: start;
           grid-auto-rows: minmax(32px, auto);
+          min-width: 0;
+        }
+
+        .grid-section {
+          flex: 1 1 auto;
+          min-width: 0;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        .page-switcher {
+          display: flex;
+          justify-content: center;
+          gap: 8px;
+        }
+
+        .page-switcher__btn {
+          border: 1px solid var(--border);
+          background: var(--card);
+          color: var(--text);
+          border-radius: 10px;
+          padding: 8px 14px;
+          font-size: 13px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: background 0.15s ease, border-color 0.15s ease;
+        }
+
+        .page-switcher__btn:hover {
+          background: rgba(37, 99, 235, 0.10);
+        }
+
+        .page-switcher__btn.is-active {
+          background: rgba(37, 99, 235, 0.14);
+          border-color: var(--accent);
+          color: var(--accent);
+        }
+
+        .grid-wrap > .mini-table {
+          grid-column: span 2;
+        }
+
+        .grid-wrap > .mini-table:nth-last-child(2) {
+          grid-column: 2 / span 2;
+        }
+
+        .grid-wrap > .mini-table:last-child {
+          grid-column: 4 / span 2;
         }
 
         .mini-table {
@@ -212,6 +279,7 @@
         .side {
           width: 460px;
           flex: 0 0 460px;
+          min-width: 0;
         }
 
         .game-panel {
@@ -400,6 +468,85 @@
           transform: scale(0.94);
         }
 
+        .player-chip__role-slot {
+          width: 24px;
+          height: 24px;
+          border-radius: 8px;
+          border: 1px dashed var(--border);
+          background: rgba(37, 99, 235, 0.06);
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          flex: 0 0 24px;
+          overflow: hidden;
+          cursor: pointer;
+        }
+
+        .player-chip__role-slot.has-role {
+          border-style: solid;
+          border-color: var(--role-accent-color, currentColor);
+          background: rgba(37, 99, 235, 0.10);
+        }
+
+        .player-chip__role-slot.drag-over {
+          border-color: var(--accent);
+          background: var(--drop);
+        }
+
+        .player-chip__role-icon {
+          width: 20px;
+          height: 20px;
+          object-fit: contain;
+          display: block;
+        }
+
+        .player-chip__role-placeholder {
+          font-size: 12px;
+          line-height: 1;
+          color: var(--muted);
+          user-select: none;
+        }
+
+        .player-chip__vehicle-slot {
+          width: 30px;
+          height: 30px;
+          border-radius: 8px;
+          border: 1px dashed var(--border);
+          background: rgba(37, 99, 235, 0.06);
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          flex: 0 0 30px;
+          overflow: hidden;
+          cursor: pointer;
+          color: inherit;
+        }
+
+        .player-chip__vehicle-slot.has-vehicle {
+          border-style: solid;
+          border-color: var(--vehicle-accent-color, currentColor);
+          background: rgba(37, 99, 235, 0.10);
+        }
+
+        .player-chip__vehicle-slot.drag-over {
+          border-color: var(--accent);
+          background: var(--drop);
+        }
+
+        .player-chip__vehicle-icon {
+          width: 24px;
+          height: 24px;
+          object-fit: contain;
+          display: block;
+        }
+
+        .player-chip__vehicle-placeholder {
+          font-size: 12px;
+          line-height: 1;
+          color: var(--muted);
+          user-select: none;
+        }
+
         body[data-theme="dark"] .player-chip__remove {
           background: #ef4444;
           border-color: rgba(248, 113, 113, 0.55);
@@ -416,6 +563,11 @@
 
         .player-chip:active {
           cursor: grabbing;
+        }
+
+        .player-chip.role-drag-over {
+          border-color: var(--accent);
+          background: var(--drop) !important;
         }
 
         .player-chip.accepted {
@@ -646,30 +798,335 @@
           outline: none;
         }
 
+        .roles-panel {
+          margin-top: 14px;
+          padding-top: 14px;
+          border-top: 1px solid var(--border);
+        }
+
+        .roles-title {
+          margin: 0 0 8px;
+          font-size: 13px;
+          font-weight: 700;
+          color: var(--text);
+        }
+
+        .roles-list {
+          display: grid;
+          grid-template-columns: repeat(6, minmax(0, 1fr));
+          gap: 8px;
+        }
+
+        .role-icon {
+          width: 42px;
+          height: 42px;
+          border: 1px solid color-mix(in srgb, var(--border) 70%, #94a3b8 30%);
+          border-radius: 10px;
+          padding: 6px;
+          background: linear-gradient(180deg, #ffffff 0%, #f3f6fb 100%);
+          cursor: grab;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          justify-self: center;
+          transition: transform 0.12s ease, border-color 0.12s ease;
+        }
+
+        .role-icon:hover {
+          transform: translateY(-1px);
+          border-color: var(--accent);
+        }
+
+        .role-icon:active {
+          cursor: grabbing;
+        }
+
+        .role-icon img {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+          pointer-events: none;
+          filter: drop-shadow(0 0 1px rgba(17, 24, 39, 0.55)) contrast(1.14);
+        }
+
+        .vehicle-panel {
+          margin-top: 14px;
+          padding-top: 14px;
+          border-top: 1px solid var(--border);
+        }
+
+        .vehicle-title {
+          margin: 0 0 8px;
+          font-size: 13px;
+          font-weight: 700;
+          color: var(--text);
+        }
+
+        .vehicle-color-menu {
+          position: fixed;
+          z-index: 50;
+          min-width: 180px;
+          padding: 8px;
+          border: 1px solid var(--border);
+          border-radius: 12px;
+          background: var(--card);
+          box-shadow: var(--shadow);
+          display: none;
+        }
+
+        .vehicle-color-menu.is-open {
+          display: block;
+        }
+
+        .vehicle-color-menu__title {
+          margin: 0 0 8px;
+          font-size: 12px;
+          font-weight: 700;
+          color: var(--muted);
+        }
+
+        .vehicle-color-menu__option {
+          width: 100%;
+          border: 1px solid var(--border);
+          background: var(--card);
+          color: var(--text);
+          border-radius: 8px;
+          padding: 6px 8px;
+          font-size: 12px;
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          cursor: pointer;
+          margin-top: 6px;
+          text-align: left;
+        }
+
+        .vehicle-color-menu__option:first-of-type {
+          margin-top: 0;
+        }
+
+        .vehicle-color-menu__option:hover {
+          background: rgba(37, 99, 235, 0.10);
+        }
+
+        .vehicle-color-menu__swatch {
+          width: 12px;
+          height: 12px;
+          border-radius: 999px;
+          border: 1px solid rgba(0, 0, 0, 0.15);
+          flex: 0 0 12px;
+        }
+
+        .vehicle-list {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 8px;
+        }
+
+        .vehicle-icon {
+          width: 42px;
+          height: 42px;
+          border: 1px solid color-mix(in srgb, var(--border) 70%, #94a3b8 30%);
+          border-radius: 10px;
+          padding: 6px;
+          background: linear-gradient(180deg, #ffffff 0%, #f3f6fb 100%);
+          cursor: grab;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          justify-self: center;
+          transition: transform 0.12s ease, border-color 0.12s ease;
+        }
+
+        .vehicle-icon:hover {
+          transform: translateY(-1px);
+          border-color: var(--accent);
+        }
+
+        .vehicle-icon:active {
+          cursor: grabbing;
+        }
+
+        .vehicle-icon img {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+          pointer-events: none;
+          filter: drop-shadow(0 0 1px rgba(17, 24, 39, 0.55)) contrast(1.14);
+        }
+
+        .player-chip__role-icon,
+        .player-chip__vehicle-icon {
+          filter: drop-shadow(0 0 1px rgba(17, 24, 39, 0.45)) contrast(1.1);
+        }
+
+        body[data-theme="dark"] .role-icon,
+        body[data-theme="dark"] .vehicle-icon {
+          border-color: var(--border);
+          background: var(--card);
+        }
+
+        body[data-theme="dark"] .role-icon img,
+        body[data-theme="dark"] .vehicle-icon img,
+        body[data-theme="dark"] .player-chip__role-icon,
+        body[data-theme="dark"] .player-chip__vehicle-icon {
+          filter: none;
+        }
+
+        @media (max-width: 1320px) {
+          .page {
+            padding: 18px;
+          }
+
+          .layout {
+            gap: 16px;
+          }
+
+          .grid-wrap {
+            grid-template-columns: repeat(2, minmax(240px, 1fr));
+          }
+
+          .grid-wrap > .mini-table,
+          .grid-wrap > .mini-table:nth-last-child(2),
+          .grid-wrap > .mini-table:last-child {
+            grid-column: auto;
+          }
+
+          .side {
+            width: 360px;
+            flex-basis: 360px;
+          }
+        }
+
         @media (max-width: 1200px) {
           .layout {
             flex-direction: column;
+            align-items: stretch;
           }
 
+          .counter-panel,
           .side {
             width: 100%;
             flex-basis: auto;
           }
+
+          .counter-panel {
+            position: static;
+            top: auto;
+            order: 2;
+          }
+
+          .grid-wrap {
+            width: 100%;
+            max-width: none;
+            grid-template-columns: repeat(2, minmax(240px, 1fr));
+          }
+
+          .grid-section {
+            order: 3;
+          }
+
+          .side {
+            order: 1;
+          }
         }
 
         @media (max-width: 900px) {
+          .page {
+            padding: 14px;
+          }
+
+          .auth-required__message {
+            font-size: 20px;
+          }
+
+          .mini-table {
+            transform: none;
+          }
+
           .grid-wrap {
             grid-template-columns: 1fr;
+            gap: 10px;
+          }
+
+          .page-switcher {
+            justify-content: stretch;
+            width: 100%;
+          }
+
+          .page-switcher__btn {
+            flex: 1 1 auto;
+            min-height: 40px;
+            font-size: 14px;
+          }
+
+          .roles-list {
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+          }
+
+          .role-icon {
+            width: 38px;
+            height: 38px;
+            padding: 5px;
+          }
+
+          .vehicle-list {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+          }
+
+          .vehicle-icon {
+            width: 38px;
+            height: 38px;
+            padding: 5px;
+          }
+
+          .grid-wrap > .mini-table,
+          .grid-wrap > .mini-table:nth-last-child(2),
+          .grid-wrap > .mini-table:last-child {
+            grid-column: auto;
           }
 
           .players-row {
             grid-template-columns: 1fr;
+            gap: 10px;
+          }
+
+          .game-panel,
+          .counter-panel {
+            padding: 14px;
+          }
+
+          .counter-value {
+            font-size: 24px;
+          }
+        }
+
+        @media (max-width: 600px) {
+          .page {
+            padding: 10px;
+          }
+
+          .auth-required {
+            padding: 16px;
+          }
+
+          .auth-required__message {
+            font-size: 18px;
+          }
+
+          .game-select,
+          .counter-select,
+          .counter-input,
+          .game-field-input,
+          .clear-button {
+            font-size: 16px;
           }
         }
     </style>
 </head>
-<body>
+<body data-authenticated="{{ request.user.is_authenticated|yesno:'true,false' }}">
 {% include "partials/site_header.html" %}
+{% if request.user.is_authenticated %}
 <div class="page">
     <div class="layout">
         <div class="counter-panel" id="counterPanel">
@@ -700,7 +1157,13 @@
             <button type="button" class="clear-button" id="clearButton">Очистить</button>
         </div>
 
-        <div class="grid-wrap" id="grid"></div>
+        <div class="grid-section">
+            <div class="grid-wrap" id="grid"></div>
+            <div class="page-switcher" id="pageSwitcher">
+                <button type="button" class="page-switcher__btn is-active" data-page-number="1">Страница 1</button>
+                <button type="button" class="page-switcher__btn" data-page-number="2">Страница 2</button>
+            </div>
+        </div>
 
         <aside class="side">
             <div class="game-panel">
@@ -709,6 +1172,16 @@
                     <option value="">Загрузка...</option>
                 </select>
 
+                <div class="roles-panel">
+                    <h4 class="roles-title">Роли</h4>
+                    <div class="roles-list" id="rolesList"></div>
+                </div>
+
+                <div class="vehicle-panel">
+                    <h4 class="vehicle-title">Техника</h4>
+                    <div class="vehicle-list" id="vehicleList"></div>
+                </div>
+
                 <div class="game-details" id="gameDetails">
                     <div class="placeholder">Выберите игру из списка, чтобы увидеть участников.</div>
                 </div>
@@ -716,14 +1189,55 @@
         </aside>
     </div>
 </div>
+{% else %}
+<div class="auth-required">
+    <p class="auth-required__message">Для продолжения работы авторизуйтесь через Discord</p>
+</div>
+{% endif %}
+<div class="vehicle-color-menu" id="vehicleColorMenu" role="menu" aria-hidden="true">
+    <p class="vehicle-color-menu__title">Изменить цвет техники</p>
+    <div id="vehicleColorMenuOptions"></div>
+</div>
 {% include "partials/site_footer.html" %}
 
+<script>
+    (function () {
+      const themeToggle = document.getElementById('themeToggle');
+
+      function applyTheme(theme) {
+        const normalizedTheme = theme === 'dark' ? 'dark' : 'light';
+        document.body.dataset.theme = normalizedTheme;
+        if (themeToggle) {
+          themeToggle.textContent = normalizedTheme === 'dark' ? 'Светлая тема' : 'Тёмная тема';
+        }
+      }
+
+      const savedTheme = localStorage.getItem('site-theme');
+      applyTheme(savedTheme || 'light');
+
+      if (themeToggle) {
+        themeToggle.addEventListener('click', () => {
+          const nextTheme = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
+          applyTheme(nextTheme);
+          localStorage.setItem('site-theme', nextTheme);
+        });
+      }
+    })();
+</script>
+
+{% if request.user.is_authenticated %}
 <script>
     const grid = document.getElementById('grid');
     const gameSelect = document.getElementById('gameSelect');
     const gameDetails = document.getElementById('gameDetails');
     const clearButton = document.getElementById('clearButton');
+    const pageSwitcher = document.getElementById('pageSwitcher');
+    const rolesList = document.getElementById('rolesList');
+    const vehicleList = document.getElementById('vehicleList');
+    const vehicleColorMenu = document.getElementById('vehicleColorMenu');
+    const vehicleColorMenuOptions = document.getElementById('vehicleColorMenuOptions');
 
+    const isAuthenticated = document.body.dataset.authenticated === 'true';
     const API_URL = "/lineup/api/game/";
     const ASSIGN_API_URL = "/lineup/api/assign/";
     const gamesCache = [];
@@ -745,16 +1259,133 @@
     let assignmentsByPlayerKey = {};
     let assignmentByCellIndex = {};
     const formatOptions = ['20x20', '26x26', '30x30', '48x48'];
+    const pageOptions = [1, 2];
+    let currentPage = 1;
+    let roleByPlayerKey = {};
+    let roleByCellIndex = {};
+    let vehicleByPlayerKey = {};
+    let vehicleByCellIndex = {};
+    let vehicleColorByPlayerKey = {};
+    let vehicleColorByCellIndex = {};
+    let vehicleColorMenuPlayerKey = null;
 
     const counterValue = document.getElementById('counterValue');
     const formatSelect = document.getElementById('formatSelect');
     const gameNoteInput = document.getElementById('gameNoteInput');
-    const themeToggle = document.getElementById('themeToggle');
+    const pageButtons = pageSwitcher
+      ? Array.from(pageSwitcher.querySelectorAll('.page-switcher__btn'))
+      : [];
     let gameNoteSaveTimer = null;
+    const roleIcons = [
+      'T_role_automaticrifleman.PNG',
+      'T_role_automaticrifleman_optic.PNG',
+      'T_role_crewman.PNG',
+      'T_role_crewman_squadleader.PNG',
+      'T_role_designatedmarksman.PNG',
+      'T_role_engineer.PNG',
+      'T_role_grenadier.PNG',
+      'T_role_heavyantitank.PNG',
+      'T_role_lightantitank.PNG',
+      'T_role_machinegunner.PNG',
+      'T_role_medic.PNG',
+      'T_role_pilot_squadleader.PNG',
+      'T_role_rifleman.PNG',
+      'T_role_rifleman_scoped.PNG',
+      'T_role_sapper.PNG',
+      'T_role_scout.PNG',
+      'T_role_sniper.PNG',
+      'T_role_squadleader.PNG',
+      'T_CameraMan_64.PNG',
+      'deployable_GMG.PNG',
+      'deployable_mortars.PNG'
+    ];
+    const vehicleIcons = [
+      'Jeep_transport_vehicle_icon.webp',
+      'Jeep_vehicle_icon.webp',
+      'Mgs_vehicle_icon.webp',
+      'Tank_vehicle_icon.webp',
+      'Trackedapc_vehicle_icon.webp',
+      'Trackedifv_vehicle_icon.webp',
+      'Transporthelo_vehicle_icon.webp',
+      'Truck_logistics_vehicle_icon.webp',
+      'Truck_transport_vehicle_icon.webp'
+    ];
+    const legacyRoleIconMap = {
+      'Icon_Automatic_Rifleman_kit.webp': 'T_role_automaticrifleman.PNG',
+      'Icon_Combat_Engineer_kit.webp': 'T_role_engineer.PNG',
+      'Icon_Crewman_kit.webp': 'T_role_crewman.PNG',
+      'Icon_Grenadier_kit.webp': 'T_role_grenadier.PNG',
+      'Icon_Heavy_Anti_Tank_kit.webp': 'T_role_heavyantitank.PNG',
+      'Icon_Infiltrator_kit.webp': 'T_CameraMan_64.PNG',
+      'Icon_Lead_Crewman_kit.webp': 'T_role_crewman_squadleader.PNG',
+      'Icon_Lead_Pilot_kit.webp': 'T_role_pilot_squadleader.PNG',
+      'Icon_Light_Anti_Tank_kit.webp': 'T_role_lightantitank.PNG',
+      'Icon_Machine_Gunner_kit.webp': 'T_role_machinegunner.PNG',
+      'Icon_Marksman_kit.webp': 'T_role_designatedmarksman.PNG',
+      'Icon_Medic_kit.webp': 'T_role_medic.PNG',
+      'Icon_Pilot.webp': 'T_role_pilot_squadleader.PNG',
+      'Icon_Raider_kit.webp': 'T_role_rifleman_scoped.PNG',
+      'Icon_Rifleman_kit.webp': 'T_role_rifleman.PNG',
+      'Icon_Sapper_kit.webp': 'T_role_sapper.PNG',
+      'Icon_Scout_kit.webp': 'T_role_scout.PNG',
+      'Icon_Sniper_kit.webp': 'T_role_sniper.PNG',
+      'Icon_Squad_Leader_kit.webp': 'T_role_squadleader.PNG'
+    };
+    const legacyVehicleIconMap = {
+      'map_apc.PNG': 'Trackedapc_vehicle_icon.webp',
+      'map_ifv.PNG': 'Trackedifv_vehicle_icon.webp',
+      'map_jeep.PNG': 'Jeep_transport_vehicle_icon.webp',
+      'map_jeep_logistics.PNG': 'Truck_logistics_vehicle_icon.webp',
+      'map_jeep_turret.PNG': 'Jeep_vehicle_icon.webp',
+      'map_tank.PNG': 'Tank_vehicle_icon.webp',
+      'map_transporthelo.PNG': 'Transporthelo_vehicle_icon.webp',
+      'map_truck_logistics.PNG': 'Truck_logistics_vehicle_icon.webp',
+      'map_truck_transport.PNG': 'Truck_transport_vehicle_icon.webp',
+      'T_map_helicopter_lightcas.PNG': 'Transporthelo_vehicle_icon.webp',
+      'T_map_mgs.PNG': 'Mgs_vehicle_icon.webp'
+    };
 
     function getTableColor(cellIndex) {
       const tableIndex = Math.floor(cellIndex / 6);
       return tableNames[tableIndex].toLowerCase();
+    }
+
+    function getTableHexColor(tableColor) {
+      const colorMap = {
+        blue: '#2563eb',
+        purple: '#7c3aed',
+        red: '#dc2626',
+        green: '#16a34a',
+        pink: '#db2777',
+        yellow: '#ca8a04',
+        orange: '#ea580c',
+        cyan: '#0891b2',
+        black: '#111827',
+        white: '#6b7280',
+        grey: '#4b5563',
+        heli: '#0f766e'
+      };
+      return colorMap[tableColor] || '#2563eb';
+    }
+
+    function getPlayerSquadColor(playerKey) {
+      const cellIndex = assignmentsByPlayerKey[playerKey];
+      if (cellIndex === undefined) return '#2563eb';
+      const tableColor = getTableColor(cellIndex);
+      return getTableHexColor(tableColor);
+    }
+
+    function getSquadColorOptions() {
+      return [
+        { id: 'blue', label: 'BLUE', color: '#2563eb' },
+        { id: 'purple', label: 'PURPLE', color: '#7c3aed' },
+        { id: 'red', label: 'RED', color: '#dc2626' },
+        { id: 'green', label: 'GREEN', color: '#16a34a' },
+        { id: 'pink', label: 'PINK', color: '#db2777' },
+        { id: 'yellow', label: 'YELLOW', color: '#ca8a04' },
+        { id: 'orange', label: 'ORANGE', color: '#ea580c' },
+        { id: 'cyan', label: 'CYAN', color: '#0891b2' }
+      ];
     }
 
     function updateCounter() {
@@ -768,19 +1399,6 @@
       formatSelect.innerHTML = formatOptions
         .map((format) => `<option value="${format}">${format}</option>`)
         .join('');
-    }
-
-    function applyTheme(theme) {
-      const normalizedTheme = theme === 'dark' ? 'dark' : 'light';
-      document.body.dataset.theme = normalizedTheme;
-      if (themeToggle) {
-        themeToggle.textContent = normalizedTheme === 'dark' ? 'Светлая тема' : 'Тёмная тема';
-      }
-    }
-
-    function initTheme() {
-      const savedTheme = localStorage.getItem('site-theme');
-      applyTheme(savedTheme || 'light');
     }
 
     function getCookie(name) {
@@ -810,6 +1428,17 @@
     function clearAssignments() {
       assignmentsByPlayerKey = {};
       assignmentByCellIndex = {};
+      roleByPlayerKey = {};
+      roleByCellIndex = {};
+      vehicleByPlayerKey = {};
+      vehicleByCellIndex = {};
+      vehicleColorByPlayerKey = {};
+      vehicleColorByCellIndex = {};
+    }
+
+    function getAssignmentPageNumber(assignment) {
+      const page = Number(assignment?.page_number ?? 1);
+      return pageOptions.includes(page) ? page : 1;
     }
 
     function buildPlayersIndex(game) {
@@ -834,10 +1463,21 @@
     function syncGameAssignmentsFromState() {
       if (!currentGame) return;
 
-      currentGame.assignments = Object.keys(assignmentsByPlayerKey).map((participantId) => ({
+      const allAssignments = Array.isArray(currentGame.assignments) ? currentGame.assignments : [];
+      const assignmentsForOtherPages = allAssignments.filter(
+        (assignment) => getAssignmentPageNumber(assignment) !== currentPage
+      );
+
+      const assignmentsForCurrentPage = Object.keys(assignmentsByPlayerKey).map((participantId) => ({
         participant_id: Number(participantId),
-        cell_index: assignmentsByPlayerKey[participantId]
+        cell_index: assignmentsByPlayerKey[participantId],
+        page_number: currentPage,
+        role_icon: roleByPlayerKey[participantId] || '',
+        vehicle_icon: vehicleByPlayerKey[participantId] || '',
+        vehicle_color: vehicleColorByPlayerKey[participantId] || '#ffffff'
       }));
+
+      currentGame.assignments = [...assignmentsForOtherPages, ...assignmentsForCurrentPage];
     }
 
     function loadAssignmentsFromGame(game) {
@@ -845,8 +1485,14 @@
 
       const assignments = Array.isArray(game?.assignments) ? game.assignments : [];
       assignments.forEach((assignment) => {
+        const assignmentPage = getAssignmentPageNumber(assignment);
+        if (assignmentPage !== currentPage) return;
+
         const participantId = assignment.participant_id ?? assignment.participant?.id;
         const cellIndex = assignment.cell_index;
+        const roleIcon = typeof assignment.role_icon === 'string' ? assignment.role_icon : '';
+        const vehicleIcon = typeof assignment.vehicle_icon === 'string' ? assignment.vehicle_icon : '';
+        const vehicleColorRaw = normalizeVehicleColor(assignment.vehicle_color);
 
         if (participantId === undefined || participantId === null || cellIndex === undefined || cellIndex === null) {
           return;
@@ -857,10 +1503,183 @@
 
         assignmentsByPlayerKey[key] = cellIndex;
         assignmentByCellIndex[cellIndex] = key;
+        roleByPlayerKey[key] = roleIcon;
+        roleByCellIndex[cellIndex] = roleIcon;
+        vehicleByPlayerKey[key] = vehicleIcon;
+        vehicleByCellIndex[cellIndex] = vehicleIcon;
+        const defaultSquadColor = getTableHexColor(getTableColor(cellIndex));
+        const vehicleColor = vehicleColorRaw === '#ffffff' ? defaultSquadColor : vehicleColorRaw;
+        vehicleColorByPlayerKey[key] = vehicleColor;
+        vehicleColorByCellIndex[cellIndex] = vehicleColor;
       });
     }
 
-    function createPlayerChip(player, isAssigned, tableColor = null) {
+    function normalizeRoleIcon(roleIcon) {
+      if (!roleIcon || typeof roleIcon !== 'string') return '';
+      if (roleIcons.includes(roleIcon)) return roleIcon;
+      return legacyRoleIconMap[roleIcon] || '';
+    }
+
+    function normalizeVehicleIcon(vehicleIcon) {
+      if (!vehicleIcon || typeof vehicleIcon !== 'string') return '';
+      if (vehicleIcons.includes(vehicleIcon)) return vehicleIcon;
+      return legacyVehicleIconMap[vehicleIcon] || '';
+    }
+
+    function getRoleIconUrl(roleIcon) {
+      const normalizedRoleIcon = normalizeRoleIcon(roleIcon);
+      if (!normalizedRoleIcon) return '';
+      return `/static/icons/${normalizedRoleIcon}`;
+    }
+
+    function getVehicleIconUrl(vehicleIcon) {
+      const normalizedVehicleIcon = normalizeVehicleIcon(vehicleIcon);
+      if (!normalizedVehicleIcon) return '';
+      return `/static/vehicle/${normalizedVehicleIcon}`;
+    }
+
+    function normalizeVehicleColor(color) {
+      if (typeof color !== 'string') return '#ffffff';
+      const normalized = color.trim().toLowerCase();
+      return /^#[0-9a-f]{6}$/.test(normalized) ? normalized : '#ffffff';
+    }
+
+    function getDragType(event) {
+      const explicitType = event.dataTransfer.getData('application/x-lineup-drag-type');
+      if (explicitType) return explicitType;
+
+      const types = Array.from(event.dataTransfer.types || []);
+      if (types.includes('application/x-lineup-role-icon') || types.includes('text/x-lineup-role-icon')) {
+        return 'role';
+      }
+      if (types.includes('application/x-lineup-vehicle-icon') || types.includes('text/x-lineup-vehicle-icon')) {
+        return 'vehicle';
+      }
+
+      const plain = event.dataTransfer.getData('text/plain');
+      if (plain && plain.startsWith('role:')) return 'role';
+      if (plain && plain.startsWith('vehicle:')) return 'vehicle';
+      return 'player';
+    }
+
+    function getDraggedRoleIcon(event) {
+      const customRole = event.dataTransfer.getData('application/x-lineup-role-icon')
+        || event.dataTransfer.getData('text/x-lineup-role-icon');
+      if (customRole) return customRole;
+
+      const plain = event.dataTransfer.getData('text/plain');
+      if (plain && plain.startsWith('role:')) {
+        return plain.slice(5);
+      }
+
+      return '';
+    }
+
+    function getDraggedVehicleIcon(event) {
+      const customVehicle = event.dataTransfer.getData('application/x-lineup-vehicle-icon')
+        || event.dataTransfer.getData('text/x-lineup-vehicle-icon');
+      if (customVehicle) return customVehicle;
+
+      const plain = event.dataTransfer.getData('text/plain');
+      if (plain && plain.startsWith('vehicle:')) {
+        return plain.slice(8);
+      }
+
+      return '';
+    }
+
+    function initRolesPalette() {
+      if (!rolesList) return;
+      rolesList.innerHTML = '';
+
+      roleIcons.forEach((roleIcon) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'role-icon';
+        button.draggable = true;
+        button.title = roleIcon
+          .replace(/^Icon_/, '')
+          .replace(/^T_/, '')
+          .replace(/_/g, ' ')
+          .replace(/\.(webp|png)$/i, '');
+        button.dataset.roleIcon = roleIcon;
+        button.innerHTML = `<img src="${getRoleIconUrl(roleIcon)}" alt="${button.title}"/>`;
+
+        button.addEventListener('dragstart', (e) => {
+          e.dataTransfer.effectAllowed = 'copy';
+          e.dataTransfer.setData('application/x-lineup-drag-type', 'role');
+          e.dataTransfer.setData('application/x-lineup-role-icon', roleIcon);
+          e.dataTransfer.setData('text/x-lineup-role-icon', roleIcon);
+          e.dataTransfer.setData('text/plain', `role:${roleIcon}`);
+        });
+
+        rolesList.appendChild(button);
+      });
+    }
+
+    function initVehiclesPalette() {
+      if (!vehicleList) return;
+      vehicleList.innerHTML = '';
+
+      vehicleIcons.forEach((vehicleIcon) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'vehicle-icon';
+        button.draggable = true;
+        button.title = vehicleIcon
+          .replace(/^T_/, '')
+          .replace(/_/g, ' ')
+          .replace(/\.(webp|png)$/i, '');
+        button.dataset.vehicleIcon = vehicleIcon;
+        button.innerHTML = `<img src="${getVehicleIconUrl(vehicleIcon)}" alt="${button.title}"/>`;
+
+        button.addEventListener('dragstart', (e) => {
+          e.dataTransfer.effectAllowed = 'copy';
+          e.dataTransfer.setData('application/x-lineup-drag-type', 'vehicle');
+          e.dataTransfer.setData('application/x-lineup-vehicle-icon', vehicleIcon);
+          e.dataTransfer.setData('text/x-lineup-vehicle-icon', vehicleIcon);
+          e.dataTransfer.setData('text/plain', `vehicle:${vehicleIcon}`);
+        });
+
+        vehicleList.appendChild(button);
+      });
+    }
+
+    function closeVehicleColorMenu() {
+      if (!vehicleColorMenu) return;
+      vehicleColorMenu.classList.remove('is-open');
+      vehicleColorMenu.setAttribute('aria-hidden', 'true');
+      vehicleColorMenuPlayerKey = null;
+    }
+
+    function openVehicleColorMenu(playerKey, x, y) {
+      if (!vehicleColorMenu || !vehicleColorMenuOptions) return;
+      vehicleColorMenuOptions.innerHTML = '';
+      vehicleColorMenuPlayerKey = playerKey;
+
+      getSquadColorOptions().forEach((option) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'vehicle-color-menu__option';
+        button.innerHTML = `<span class="vehicle-color-menu__swatch" style="background:${option.color}"></span>${option.label}`;
+        button.addEventListener('click', (e) => {
+          e.preventDefault();
+          if (!vehicleColorMenuPlayerKey) return;
+          const currentVehicle = vehicleByPlayerKey[vehicleColorMenuPlayerKey];
+          if (!currentVehicle) return;
+          assignVehicleToPlayer(vehicleColorMenuPlayerKey, currentVehicle, option.color);
+          closeVehicleColorMenu();
+        });
+        vehicleColorMenuOptions.appendChild(button);
+      });
+
+      vehicleColorMenu.style.left = `${x}px`;
+      vehicleColorMenu.style.top = `${y}px`;
+      vehicleColorMenu.classList.add('is-open');
+      vehicleColorMenu.setAttribute('aria-hidden', 'false');
+    }
+
+    function createPlayerChip(player, isAssigned, tableColor = null, roleIcon = '', vehicleIcon = '', vehicleColor = '#ffffff') {
       const chip = document.createElement('span');
 
       const statusClass = player._status || '';
@@ -872,7 +1691,7 @@
         chip.className = `player-chip ${tableClass}`;
       }
 
-      chip.draggable = true;
+      chip.draggable = isAuthenticated;
       chip.dataset.playerKey = player._key;
 
       const nameText = document.createElement('span');
@@ -880,7 +1699,115 @@
       nameText.textContent = player.name;
       chip.appendChild(nameText);
 
-      if (isAssigned) {
+      if (isAuthenticated && isAssigned) {
+        const roleSlot = document.createElement('button');
+        roleSlot.type = 'button';
+        roleSlot.className = 'player-chip__role-slot';
+        roleSlot.title = roleIcon ? 'Убрать роль' : 'Перетащите роль сюда';
+
+        if (roleIcon) {
+          roleSlot.classList.add('has-role');
+          if (tableColor) {
+            roleSlot.style.setProperty('--role-accent-color', getTableHexColor(tableColor));
+          }
+          const roleImage = document.createElement('img');
+          roleImage.className = 'player-chip__role-icon';
+          roleImage.src = getRoleIconUrl(roleIcon);
+          roleImage.alt = 'Роль';
+          roleSlot.appendChild(roleImage);
+        } else {
+          const placeholder = document.createElement('span');
+          placeholder.className = 'player-chip__role-placeholder';
+          placeholder.textContent = '+';
+          roleSlot.appendChild(placeholder);
+        }
+
+        roleSlot.addEventListener('dragover', (e) => {
+          if (!isAuthenticated) return;
+          e.preventDefault();
+          roleSlot.classList.add('drag-over');
+        });
+
+        roleSlot.addEventListener('dragleave', () => {
+          roleSlot.classList.remove('drag-over');
+        });
+
+        roleSlot.addEventListener('drop', (e) => {
+          if (!isAuthenticated) return;
+          e.preventDefault();
+          roleSlot.classList.remove('drag-over');
+          const droppedRoleIcon = getDraggedRoleIcon(e);
+          if (!droppedRoleIcon) return;
+          assignRoleToPlayer(player._key, droppedRoleIcon);
+        });
+
+        roleSlot.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (!roleIcon) return;
+          assignRoleToPlayer(player._key, '');
+        });
+
+        chip.appendChild(roleSlot);
+
+        const vehicleSlot = document.createElement('button');
+        vehicleSlot.type = 'button';
+        vehicleSlot.className = 'player-chip__vehicle-slot';
+        vehicleSlot.title = vehicleIcon ? 'Убрать технику' : 'Перетащите технику сюда';
+
+        if (vehicleIcon) {
+          vehicleSlot.classList.add('has-vehicle');
+          const normalizedVehicleColor = normalizeVehicleColor(vehicleColor);
+          vehicleSlot.style.setProperty('--vehicle-accent-color', normalizedVehicleColor);
+          const vehicleImage = document.createElement('img');
+          vehicleImage.className = 'player-chip__vehicle-icon';
+          vehicleImage.src = getVehicleIconUrl(vehicleIcon);
+          vehicleImage.alt = 'Техника';
+          vehicleSlot.appendChild(vehicleImage);
+        } else {
+          const placeholder = document.createElement('span');
+          placeholder.className = 'player-chip__vehicle-placeholder';
+          placeholder.textContent = 'V';
+          vehicleSlot.appendChild(placeholder);
+        }
+
+        vehicleSlot.addEventListener('dragover', (e) => {
+          if (!isAuthenticated) return;
+          if (getDragType(e) !== 'vehicle') return;
+          e.preventDefault();
+          vehicleSlot.classList.add('drag-over');
+        });
+
+        vehicleSlot.addEventListener('dragleave', () => {
+          vehicleSlot.classList.remove('drag-over');
+        });
+
+        vehicleSlot.addEventListener('drop', (e) => {
+          if (!isAuthenticated) return;
+          if (getDragType(e) !== 'vehicle') return;
+          e.preventDefault();
+          vehicleSlot.classList.remove('drag-over');
+          const droppedVehicleIcon = getDraggedVehicleIcon(e);
+          if (!droppedVehicleIcon) return;
+          assignVehicleToPlayer(player._key, droppedVehicleIcon);
+        });
+
+        vehicleSlot.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (!vehicleIcon) return;
+          assignVehicleToPlayer(player._key, '');
+        });
+
+        vehicleSlot.addEventListener('contextmenu', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (!vehicleIcon) return;
+          openVehicleColorMenu(player._key, e.clientX, e.clientY);
+        });
+
+        chip.appendChild(vehicleSlot);
+
         const removeButton = document.createElement('button');
         removeButton.type = 'button';
         removeButton.className = 'player-chip__remove';
@@ -897,9 +1824,45 @@
       }
 
       chip.addEventListener('dragstart', (e) => {
+        if (!isAuthenticated) {
+          e.preventDefault();
+          return;
+        }
         e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('application/x-lineup-drag-type', 'player');
         e.dataTransfer.setData('text/plain', player._key);
       });
+
+      if (isAuthenticated && isAssigned) {
+        chip.addEventListener('dragover', (e) => {
+          const dragType = getDragType(e);
+          if (dragType !== 'role' && dragType !== 'vehicle') return;
+          e.preventDefault();
+          e.stopPropagation();
+          chip.classList.add('role-drag-over');
+        });
+
+        chip.addEventListener('dragleave', () => {
+          chip.classList.remove('role-drag-over');
+        });
+
+        chip.addEventListener('drop', (e) => {
+          const dragType = getDragType(e);
+          if (dragType !== 'role' && dragType !== 'vehicle') return;
+          e.preventDefault();
+          e.stopPropagation();
+          chip.classList.remove('role-drag-over');
+          if (dragType === 'role') {
+            const droppedRoleIcon = getDraggedRoleIcon(e);
+            if (!droppedRoleIcon) return;
+            assignRoleToPlayer(player._key, droppedRoleIcon);
+            return;
+          }
+          const droppedVehicleIcon = getDraggedVehicleIcon(e);
+          if (!droppedVehicleIcon) return;
+          assignVehicleToPlayer(player._key, droppedVehicleIcon);
+        });
+      }
 
       return chip;
     }
@@ -940,7 +1903,10 @@
           if (assignedKey && playersByKey.has(assignedKey)) {
             const player = playersByKey.get(assignedKey);
             const color = getTableColor(globalCellIndex);
-            content.appendChild(createPlayerChip(player, true, color));
+            const roleIcon = roleByCellIndex[globalCellIndex] || '';
+            const vehicleIcon = vehicleByCellIndex[globalCellIndex] || '';
+            const vehicleColor = vehicleColorByCellIndex[globalCellIndex] || '#ffffff';
+            content.appendChild(createPlayerChip(player, true, color, roleIcon, vehicleIcon, vehicleColor));
             cell.classList.add('has-player');
           }
 
@@ -948,6 +1914,8 @@
           cell.appendChild(content);
 
           cell.addEventListener('dragover', (e) => {
+            if (!isAuthenticated) return;
+            if (getDragType(e) !== 'player') return;
             e.preventDefault();
             cell.classList.add('drag-over');
           });
@@ -957,6 +1925,8 @@
           });
 
           cell.addEventListener('drop', (e) => {
+            if (!isAuthenticated) return;
+            if (getDragType(e) !== 'player') return;
             e.preventDefault();
             cell.classList.remove('drag-over');
 
@@ -987,6 +1957,8 @@
       block.appendChild(title);
 
       block.addEventListener('dragover', (e) => {
+        if (!isAuthenticated) return;
+        if (getDragType(e) !== 'player') return;
         e.preventDefault();
         block.classList.add('drag-over');
       });
@@ -996,6 +1968,8 @@
       });
 
       block.addEventListener('drop', (e) => {
+        if (!isAuthenticated) return;
+        if (getDragType(e) !== 'player') return;
         e.preventDefault();
         block.classList.remove('drag-over');
 
@@ -1041,7 +2015,7 @@
 
       const title = document.createElement('h3');
       title.className = 'game-title';
-      title.textContent = currentGame.name;
+      title.textContent = `${currentGame.name} — страница ${currentPage}`;
       inner.appendChild(title);
 
       const tagsWrap = document.createElement('div');
@@ -1084,7 +2058,11 @@
         formatSelect.value = formatOptions[0];
         gameNoteInput.value = '';
         renderGrid();
-        renderGameDetails();
+        if (isAuthenticated) {
+          renderGameDetails();
+        } else {
+          gameDetails.innerHTML = '<div class="placeholder">Войдите через Discord, чтобы выбрать игру и редактировать состав.</div>';
+        }
         updateCounter();
         return;
       }
@@ -1098,13 +2076,42 @@
       updateCounter();
     }
 
+    function updatePageSwitcher() {
+      pageButtons.forEach((button) => {
+        const buttonPage = Number(button.dataset.pageNumber);
+        const isActive = buttonPage === currentPage;
+        button.classList.toggle('is-active', isActive);
+        button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+      });
+    }
+
+    function setCurrentPage(pageNumber) {
+      if (!pageOptions.includes(pageNumber) || pageNumber === currentPage) return;
+      currentPage = pageNumber;
+      updatePageSwitcher();
+      loadAssignmentsFromGame(currentGame);
+      renderGrid();
+      renderGameDetails();
+      updateCounter();
+    }
+
+    function initPageSwitcher() {
+      updatePageSwitcher();
+      pageButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          const nextPage = Number(button.dataset.pageNumber);
+          setCurrentPage(nextPage);
+        });
+      });
+    }
+
     function redrawCurrentGame() {
       if (!currentGame) return;
       renderGrid();
       renderGameDetails();
     }
 
-    async function saveAssignmentToServer(playerKey, cellIndex) {
+    async function saveAssignmentToServer(playerKey, cellIndex, roleIcon = '', vehicleIcon = '', vehicleColor = '#ffffff') {
       const response = await fetch(ASSIGN_API_URL, {
         method: 'POST',
         headers: {
@@ -1115,7 +2122,11 @@
         body: JSON.stringify({
           game_id: currentGame.id,
           participant_id: Number(playerKey),
-          cell_index: cellIndex
+          cell_index: cellIndex,
+          page_number: currentPage,
+          role_icon: roleIcon,
+          vehicle_icon: vehicleIcon,
+          vehicle_color: normalizeVehicleColor(vehicleColor)
         })
       });
 
@@ -1184,37 +2195,68 @@
     function snapshotState() {
       return {
         assignmentsByPlayerKey: { ...assignmentsByPlayerKey },
-        assignmentByCellIndex: { ...assignmentByCellIndex }
+        assignmentByCellIndex: { ...assignmentByCellIndex },
+        roleByPlayerKey: { ...roleByPlayerKey },
+        roleByCellIndex: { ...roleByCellIndex },
+        vehicleByPlayerKey: { ...vehicleByPlayerKey },
+        vehicleByCellIndex: { ...vehicleByCellIndex },
+        vehicleColorByPlayerKey: { ...vehicleColorByPlayerKey },
+        vehicleColorByCellIndex: { ...vehicleColorByCellIndex }
       };
     }
 
     function restoreState(snapshot) {
       assignmentsByPlayerKey = { ...snapshot.assignmentsByPlayerKey };
       assignmentByCellIndex = { ...snapshot.assignmentByCellIndex };
+      roleByPlayerKey = { ...snapshot.roleByPlayerKey };
+      roleByCellIndex = { ...snapshot.roleByCellIndex };
+      vehicleByPlayerKey = { ...snapshot.vehicleByPlayerKey };
+      vehicleByCellIndex = { ...snapshot.vehicleByCellIndex };
+      vehicleColorByPlayerKey = { ...snapshot.vehicleColorByPlayerKey };
+      vehicleColorByCellIndex = { ...snapshot.vehicleColorByCellIndex };
       syncGameAssignmentsFromState();
     }
 
     async function assignPlayerToCell(playerKey, cellIndex) {
+      if (!isAuthenticated || !currentGame) return;
       const previousSnapshot = snapshotState();
+      const playerRole = roleByPlayerKey[playerKey] || '';
+      const playerVehicle = vehicleByPlayerKey[playerKey] || '';
+      const playerVehicleColor = vehicleColorByPlayerKey[playerKey] || '#ffffff';
 
       const previousCell = assignmentsByPlayerKey[playerKey];
       if (previousCell !== undefined) {
         delete assignmentByCellIndex[previousCell];
+        delete roleByCellIndex[previousCell];
+        delete vehicleByCellIndex[previousCell];
+        delete vehicleColorByCellIndex[previousCell];
       }
 
       const occupantKey = assignmentByCellIndex[cellIndex];
       if (occupantKey && occupantKey !== playerKey) {
         delete assignmentsByPlayerKey[occupantKey];
+        delete roleByPlayerKey[occupantKey];
+        delete vehicleByPlayerKey[occupantKey];
+        delete roleByCellIndex[cellIndex];
+        delete vehicleByCellIndex[cellIndex];
+        delete vehicleColorByPlayerKey[occupantKey];
+        delete vehicleColorByCellIndex[cellIndex];
       }
 
       assignmentsByPlayerKey[playerKey] = cellIndex;
       assignmentByCellIndex[cellIndex] = playerKey;
+      roleByPlayerKey[playerKey] = playerRole;
+      roleByCellIndex[cellIndex] = playerRole;
+      vehicleByPlayerKey[playerKey] = playerVehicle;
+      vehicleByCellIndex[cellIndex] = playerVehicle;
+      vehicleColorByPlayerKey[playerKey] = playerVehicleColor;
+      vehicleColorByCellIndex[cellIndex] = playerVehicleColor;
       syncGameAssignmentsFromState();
       redrawCurrentGame();
       updateCounter();
 
       try {
-        await saveAssignmentToServer(playerKey, cellIndex);
+        await saveAssignmentToServer(playerKey, cellIndex, playerRole, playerVehicle, playerVehicleColor);
       } catch (error) {
         console.error(error);
         restoreState(previousSnapshot);
@@ -1224,6 +2266,7 @@
     }
 
     async function unassignPlayer(playerKey) {
+      if (!isAuthenticated || !currentGame) return;
       const cellIndex = assignmentsByPlayerKey[playerKey];
       if (cellIndex === undefined) return;
 
@@ -1231,12 +2274,18 @@
 
       delete assignmentsByPlayerKey[playerKey];
       delete assignmentByCellIndex[cellIndex];
+      delete roleByPlayerKey[playerKey];
+      delete roleByCellIndex[cellIndex];
+      delete vehicleByPlayerKey[playerKey];
+      delete vehicleByCellIndex[cellIndex];
+      delete vehicleColorByPlayerKey[playerKey];
+      delete vehicleColorByCellIndex[cellIndex];
       syncGameAssignmentsFromState();
       redrawCurrentGame();
       updateCounter();
 
       try {
-        await saveAssignmentToServer(playerKey, null);
+        await saveAssignmentToServer(playerKey, null, '', '', '#ffffff');
       } catch (error) {
         console.error(error);
         restoreState(previousSnapshot);
@@ -1245,8 +2294,67 @@
       }
     }
 
+    async function assignRoleToPlayer(playerKey, roleIcon) {
+      if (!isAuthenticated || !currentGame) return;
+
+      const cellIndex = assignmentsByPlayerKey[playerKey];
+      if (cellIndex === undefined) return;
+
+      const normalizedRole = normalizeRoleIcon(roleIcon);
+      const previousSnapshot = snapshotState();
+
+      roleByPlayerKey[playerKey] = normalizedRole;
+      roleByCellIndex[cellIndex] = normalizedRole;
+      const currentVehicle = vehicleByPlayerKey[playerKey] || '';
+      const currentVehicleColor = vehicleColorByPlayerKey[playerKey] || '#ffffff';
+      syncGameAssignmentsFromState();
+      redrawCurrentGame();
+
+      try {
+        await saveAssignmentToServer(playerKey, cellIndex, normalizedRole, currentVehicle, currentVehicleColor);
+      } catch (error) {
+        console.error(error);
+        restoreState(previousSnapshot);
+        redrawCurrentGame();
+        alert(`Не удалось сохранить роль: ${error.message}`);
+      }
+    }
+
+    async function assignVehicleToPlayer(playerKey, vehicleIcon, vehicleColor = null) {
+      if (!isAuthenticated || !currentGame) return;
+
+      const cellIndex = assignmentsByPlayerKey[playerKey];
+      if (cellIndex === undefined) return;
+
+      const normalizedVehicle = normalizeVehicleIcon(vehicleIcon);
+      const fallbackColor = vehicleByPlayerKey[playerKey]
+        ? (vehicleColorByPlayerKey[playerKey] || getPlayerSquadColor(playerKey))
+        : getPlayerSquadColor(playerKey);
+      const normalizedVehicleColor = vehicleColor
+        ? normalizeVehicleColor(vehicleColor)
+        : normalizeVehicleColor(fallbackColor);
+      const previousSnapshot = snapshotState();
+
+      vehicleByPlayerKey[playerKey] = normalizedVehicle;
+      vehicleByCellIndex[cellIndex] = normalizedVehicle;
+      vehicleColorByPlayerKey[playerKey] = normalizedVehicleColor;
+      vehicleColorByCellIndex[cellIndex] = normalizedVehicleColor;
+      const currentRole = roleByPlayerKey[playerKey] || '';
+      syncGameAssignmentsFromState();
+      redrawCurrentGame();
+
+      try {
+        await saveAssignmentToServer(playerKey, cellIndex, currentRole, normalizedVehicle, normalizedVehicleColor);
+      } catch (error) {
+        console.error(error);
+        restoreState(previousSnapshot);
+        redrawCurrentGame();
+        alert(`Не удалось сохранить технику: ${error.message}`);
+      }
+    }
+
     async function clearAllTables() {
-      if (!currentGame) return;
+      if (!isAuthenticated || !currentGame) return;
 
       const assignedKeys = Object.keys(assignmentsByPlayerKey);
       if (!assignedKeys.length) return;
@@ -1263,7 +2371,7 @@
 
       try {
         for (const playerKey of assignedKeys) {
-          await saveAssignmentToServer(playerKey, null);
+          await saveAssignmentToServer(playerKey, null, '', '', '#ffffff');
         }
       } catch (error) {
         console.error(error);
@@ -1310,6 +2418,11 @@
       if (finishedGroup.children.length) {
         gameSelect.appendChild(finishedGroup);
       }
+
+      if (!isAuthenticated) {
+        gameSelect.value = '';
+        gameSelect.disabled = true;
+      }
     }
 
     async function loadGames() {
@@ -1335,6 +2448,10 @@
     }
 
     gameSelect.addEventListener('change', () => {
+      if (!isAuthenticated) {
+        gameSelect.value = '';
+        return;
+      }
       const index = gameSelect.value;
       if (index === '') {
         renderSelectedGame(null);
@@ -1344,6 +2461,7 @@
     });
 
     formatSelect.addEventListener('change', async () => {
+      if (!isAuthenticated) return;
       updateCounter();
 
       if (!currentGame) return;
@@ -1364,6 +2482,7 @@
     });
 
     gameNoteInput.addEventListener('input', () => {
+      if (!isAuthenticated) return;
       if (!currentGame) return;
 
       if (gameNoteSaveTimer) {
@@ -1388,6 +2507,7 @@
     });
 
     gameNoteInput.addEventListener('blur', async () => {
+      if (!isAuthenticated) return;
       if (!currentGame) return;
 
       if (gameNoteSaveTimer) {
@@ -1403,20 +2523,34 @@
       }
     });
 
-    if (themeToggle) {
-      themeToggle.addEventListener('click', () => {
-        const nextTheme = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
-        applyTheme(nextTheme);
-        localStorage.setItem('site-theme', nextTheme);
-      });
+    if (!isAuthenticated) {
+      formatSelect.disabled = true;
+      gameNoteInput.disabled = true;
+      clearButton.disabled = true;
+      gameDetails.innerHTML = '<div class="placeholder">Войдите через Discord, чтобы выбрать игру и редактировать состав.</div>';
     }
 
     clearButton.addEventListener('click', clearAllTables);
 
-    initTheme();
+    document.addEventListener('click', (e) => {
+      if (!vehicleColorMenu || !vehicleColorMenu.classList.contains('is-open')) return;
+      if (vehicleColorMenu.contains(e.target)) return;
+      closeVehicleColorMenu();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeVehicleColorMenu();
+      }
+    });
+
+    initRolesPalette();
+    initVehiclesPalette();
+    initPageSwitcher();
     initFormatSelect();
     updateCounter();
     loadGames();
 </script>
+{% endif %}
 </body>
 </html>

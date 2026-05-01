@@ -104,6 +104,11 @@ class GameParticipant(Model):
 
 
 class GameCellAssignment(Model):
+    PAGE_CHOICES = [
+        (1, 'Страница 1'),
+        (2, 'Страница 2'),
+    ]
+
     game = models.ForeignKey(
         ScheduleGame,
         on_delete=models.CASCADE,
@@ -117,19 +122,42 @@ class GameCellAssignment(Model):
     cell_index = models.IntegerField(
         'Индекс ячейки'
     )
+    page_number = models.PositiveSmallIntegerField(
+        'Номер страницы',
+        choices=PAGE_CHOICES,
+        default=1
+    )
+    role_icon = models.CharField(
+        'Роль',
+        max_length=120,
+        blank=True,
+        default=''
+    )
+    vehicle_icon = models.CharField(
+        'Техника',
+        max_length=120,
+        blank=True,
+        default=''
+    )
+    vehicle_color = models.CharField(
+        'Цвет техники',
+        max_length=7,
+        blank=True,
+        default='#ffffff'
+    )
 
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['game', 'participant'],
+                fields=['game', 'participant', 'page_number'],
                 name='unique_player_per_game'
             ),
             models.UniqueConstraint(
-                fields=['game', 'cell_index'],
+                fields=['game', 'cell_index', 'page_number'],
                 name='unique_cell_per_game'
             )
         ]
         verbose_name = 'Ячейки'
 
     def __str__(self):
-        return f'{self.game} {self.participant} -> {self.cell_index}'
+        return f'{self.game} стр.{self.page_number} {self.participant} -> {self.cell_index}'

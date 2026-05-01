@@ -145,6 +145,55 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
+
+        @media (max-width: 900px) {
+            .site-header {
+                padding: 10px 14px;
+            }
+
+            .site-header__inner {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .site-header__actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .site-header__brand {
+                gap: 8px;
+            }
+
+            .site-header__logo {
+                width: 36px;
+                height: 36px;
+            }
+
+            .site-header__title {
+                font-size: 16px;
+            }
+
+            .site-header__actions {
+                justify-content: stretch;
+                gap: 8px;
+            }
+
+            .theme-toggle,
+            .discord-login-button,
+            .user-menu__trigger {
+                flex: 1 1 auto;
+                justify-content: center;
+                min-height: 40px;
+                font-size: 13px;
+            }
+
+            .discord-user-name {
+                max-width: 110px;
+            }
+        }
     </style>
     <script>
         (function() {

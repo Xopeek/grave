@@ -23,7 +23,7 @@ class GameCellAssignmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GameCellAssignment
-        fields = ['participant_id', 'cell_index']
+        fields = ['participant_id', 'cell_index', 'page_number', 'role_icon', 'vehicle_icon', 'vehicle_color']
 
 
 class ScheduleGameSerializer(serializers.ModelSerializer):
