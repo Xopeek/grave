@@ -4,7 +4,6 @@ import re
 
 import discord
 from discord.ext import commands
-from django.utils.html import avoid_wrapping
 from dotenv import load_dotenv
 
 from lineup.src.sync_to_db import save_participants
@@ -94,10 +93,13 @@ async def sync():
         await handle_thread(thread, member_map)
 
 
-@bot.event
-async def on_ready():
-    print("Apollo sync started")
-    await sync()
+async def sync_apollo():
+    @bot.event
+    async def on_ready():
+        print("Apollo sync started")
+        try:
+            await sync()
+        finally:
+            await bot.close()
 
-
-bot.run(TOKEN)
+    await bot.start(TOKEN)
