@@ -49,10 +49,13 @@ async def sync_games_to_db():
         )
 
 
-@bot.event
-async def on_ready():
-    print("Sync games")
-    await sync_games_to_db()
+async def sync_disco():
+    @bot.event
+    async def on_ready():
+        print("Sync games")
+        try:
+            await sync_games_to_db()
+        finally:
+            await bot.close()
 
-
-bot.run(TOKEN)
+    await bot.start(TOKEN)

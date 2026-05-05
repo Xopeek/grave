@@ -20,7 +20,7 @@ def _csv_env(name, default=""):
 SECRET_KEY = os.environ['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = _csv_env('DEBUG')
 
 ALLOWED_HOSTS = _csv_env("ALLOWED_HOSTS", "localhost,127.0.0.1")
 CSRF_TRUSTED_ORIGINS = _csv_env(
@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'lineup.apps.LineupConfig',
     'users.apps.UsersConfig',
-
+    'django_celery_beat'
 ]
 
 MIDDLEWARE = [
@@ -139,6 +139,10 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 URL_SITE_HEADER = 'GRAVE'
 URL_SITE_TITLE = 'GRAVE'
+
+CELERY_BROKER_URL = "redis://localhost:6379/0"
+CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+CELERY_TIMEZONE = "Europe/Moscow"
 
 SESSION_COOKIE_DOMAIN = None  # для localhost достаточно None
 SESSION_COOKIE_SECURE = True
