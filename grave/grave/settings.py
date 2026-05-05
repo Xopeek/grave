@@ -13,6 +13,10 @@ def _csv_env(name, default=""):
     value = os.environ.get(name, default)
     return [item.strip() for item in value.split(",") if item.strip()]
 
+def get_bool_env(name, default=False):
+    return os.environ.get(name, str(default)).lower() in ("1", "true", "yes")
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
