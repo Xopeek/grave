@@ -1,5 +1,6 @@
 import os
 import re
+from datetime import datetime
 
 import django
 from asgiref.sync import sync_to_async
@@ -12,16 +13,29 @@ from lineup.models import ScheduleGame, GameParticipant
 
 
 @sync_to_async(thread_sensitive=True)
-def save_game_to_db(thread_id, name, archived, tags, created_at):
-    return ScheduleGame.objects.update_or_create(
+def save_game_to_db(thread_id, name, archived, tags, created_at, game_start_time=None):
+    defaults = {
+        "name": name,
+        "archived": archived,
+        "tags": tags,
+        "created_at": created_at,
+    }
+    if game_start_time is not None:
+        if isinstance(game_start_time, datetime):
+            defaults["game_start_time"] = game_start_time.isoformat(sep=" ")
+        else:
+            defaults["game_start_time"] = str(game_start_time)
+
+    # Avoid reading existing row first (update_or_create/get_or_create),
+    # because legacy SQLite values may fail during DateTime conversion.
+    updated_rows = ScheduleGame.objects.filter(discord_thread_id=thread_id).update(**defaults)
+    if updated_rows:
+        return ScheduleGame.objects.filter(discord_thread_id=thread_id).first(), False
+
+    return ScheduleGame.objects.create(
         discord_thread_id=thread_id,
-        defaults={
-            "name": name,
-            "archived": archived,
-            "tags": tags,
-            "created_at": created_at,
-        },
-    )
+        **defaults,
+    ), True
 
 
 def parse_embed_field_value(value: str) -> list[str]:

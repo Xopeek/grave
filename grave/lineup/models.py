@@ -60,6 +60,12 @@ class ScheduleGame(Model):
     created_at = models.DateTimeField(
         'Дата создания'
     )
+    game_start_time = models.CharField(
+        'Дата и время начала игры',
+        max_length=40,
+        null=True,
+        blank=True,
+    )
 
     class Meta:
         verbose_name = 'Расписание игр'
