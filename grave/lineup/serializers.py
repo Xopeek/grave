@@ -43,6 +43,7 @@ class ScheduleGameSerializer(serializers.ModelSerializer):
             'game_format',
             'game_map',
             'created_at',
+            'game_start_time',
             'participants',
             'assignments'
         )
