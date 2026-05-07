@@ -1,6 +1,5 @@
 import os
 import re
-from datetime import datetime
 
 import django
 from asgiref.sync import sync_to_async
@@ -21,10 +20,7 @@ def save_game_to_db(thread_id, name, archived, tags, created_at, game_start_time
         "created_at": created_at,
     }
     if game_start_time is not None:
-        if isinstance(game_start_time, datetime):
-            defaults["game_start_time"] = game_start_time.isoformat(sep=" ")
-        else:
-            defaults["game_start_time"] = str(game_start_time)
+        defaults["game_start_time"] = game_start_time
 
     # Avoid reading existing row first (update_or_create/get_or_create),
     # because legacy SQLite values may fail during DateTime conversion.

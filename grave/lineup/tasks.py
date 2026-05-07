@@ -6,5 +6,5 @@ from lineup.src.disco import sync_disco
 
 @shared_task(ignore_result=True)
 def run_discord_sync():
-    sync_apollo()
     sync_disco()
+    sync_apollo()
