@@ -60,9 +60,8 @@ class ScheduleGame(Model):
     created_at = models.DateTimeField(
         'Дата создания'
     )
-    game_start_time = models.CharField(
+    game_start_time = models.DateTimeField(
         'Дата и время начала игры',
-        max_length=40,
         null=True,
         blank=True,
     )
