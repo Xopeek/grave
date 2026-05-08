@@ -22,9 +22,6 @@ intents.guilds = True
 intents.members = True
 intents.message_content = True
 
-bot = commands.Bot(command_prefix="!", intents=intents)
-
-
 def build_member_map(guild):
     return {
         m.display_name.lower(): m
@@ -73,12 +70,12 @@ async def handle_thread(thread, member_map):
     await save_participants(thread.id, statuses, member_map)
 
 
-async def sync():
-    guild = bot.get_guild(GUILD_ID)
+async def sync(bot_client: commands.Bot):
+    guild = bot_client.get_guild(GUILD_ID)
     if not guild:
-        guild = await bot.fetch_guild(GUILD_ID)
+        guild = await bot_client.fetch_guild(GUILD_ID)
 
-    forum = await bot.fetch_channel(FORUM_CHANNEL_ID)
+    forum = await bot_client.fetch_channel(FORUM_CHANNEL_ID)
     if not isinstance(forum, discord.ForumChannel):
         print("not forum")
         return
@@ -94,12 +91,14 @@ async def sync():
 
 
 async def sync_apollo():
-    @bot.event
+    bot_client = commands.Bot(command_prefix="!", intents=intents)
+
+    @bot_client.event
     async def on_ready():
         print("Apollo sync started")
         try:
-            await sync()
+            await sync(bot_client)
         finally:
-            await bot.close()
+            await bot_client.close()
 
-    await bot.start(TOKEN)
+    await bot_client.start(TOKEN)
