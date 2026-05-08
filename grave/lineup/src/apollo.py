@@ -86,8 +86,17 @@ async def sync(bot_client: commands.Bot):
     async for t in forum.archived_threads(limit=None):
         threads.append(t)
 
+    processed = 0
+    failed = 0
     for thread in threads:
-        await handle_thread(thread, member_map)
+        try:
+            await handle_thread(thread, member_map)
+            processed += 1
+        except Exception as exc:
+            failed += 1
+            print(f"[apollo] failed thread={thread.id}: {exc!r}")
+
+    print(f"[apollo] completed: processed={processed}, failed={failed}, total={len(threads)}")
 
 
 async def sync_apollo():

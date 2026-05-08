@@ -62,23 +62,32 @@ async def sync_games_to_db(bot_client: commands.Bot):
     async for t in forum.archived_threads(limit=None):
         threads.append(t)
 
+    processed = 0
+    failed = 0
     for thread in threads:
-        if not thread.created_at:
-            continue
+        try:
+            if not thread.created_at:
+                continue
 
-        tags = ", ".join(tag.name for tag in thread.applied_tags)
-        first_message = await get_first_message(thread)
-        game_start_time = extract_game_start_time(first_message)
-        print(game_start_time)
+            tags = ", ".join(tag.name for tag in thread.applied_tags)
+            first_message = await get_first_message(thread)
+            game_start_time = extract_game_start_time(first_message)
+            print(f"[disco] thread={thread.id} start={game_start_time}")
 
-        await save_game_to_db(
-            thread.id,
-            thread.name,
-            thread.archived,
-            tags,
-            thread.created_at,
-            game_start_time,
-        )
+            await save_game_to_db(
+                thread.id,
+                thread.name,
+                thread.archived,
+                tags,
+                thread.created_at,
+                game_start_time,
+            )
+            processed += 1
+        except Exception as exc:
+            failed += 1
+            print(f"[disco] failed thread={thread.id}: {exc!r}")
+
+    print(f"[disco] completed: processed={processed}, failed={failed}, total={len(threads)}")
 
 
 async def sync_disco():
