@@ -71,7 +71,6 @@ intents = discord.Intents.default()
 intents.guilds = True
 intents.message_content = True
 
-bot = commands.Bot(command_prefix="!", intents=intents)
 _ICON_CACHE: dict[str, Image.Image] = {}
 
 
@@ -336,9 +335,9 @@ def _build_lineup_images(game: ScheduleGame) -> list[tuple[int, bytes]]:
     return result
 
 
-async def _has_reminder_marker(thread: discord.abc.Messageable) -> bool:
+async def _has_reminder_marker(thread: discord.abc.Messageable, bot_user_id: int) -> bool:
     async for message in thread.history(limit=50):
-        if message.author.id == bot.user.id and REMINDER_MARKER in (message.content or ""):
+        if message.author.id == bot_user_id and REMINDER_MARKER in (message.content or ""):
             return True
     return False
 
@@ -360,7 +359,7 @@ def _resolve_role_mentions(guild: discord.Guild) -> str:
     return " ".join(mentions)
 
 
-async def _send_reminders():
+async def _send_reminders(bot_client: commands.Bot):
     games = await _get_upcoming_games()
     for game in games:
         page_images = _build_lineup_images(game)
@@ -368,14 +367,14 @@ async def _send_reminders():
             continue
 
         try:
-            channel = await bot.fetch_channel(game.discord_thread_id)
+            channel = await bot_client.fetch_channel(game.discord_thread_id)
         except (discord.NotFound, discord.Forbidden, discord.HTTPException):
             continue
 
         if not isinstance(channel, discord.Thread):
             continue
 
-        if await _has_reminder_marker(channel):
+        if await _has_reminder_marker(channel, bot_client.user.id):
             continue
 
         start_str = timezone.localtime(game.game_start_time).strftime("%d.%m.%Y %H:%M")
@@ -392,11 +391,13 @@ async def _send_reminders():
 
 
 async def run_two_hours_reminder():
-    @bot.event
+    bot_client = commands.Bot(command_prefix="!", intents=intents)
+
+    @bot_client.event
     async def on_ready():
         try:
-            await _send_reminders()
+            await _send_reminders(bot_client)
         finally:
-            await bot.close()
+            await bot_client.close()
 
-    await bot.start(TOKEN)
+    await bot_client.start(TOKEN)

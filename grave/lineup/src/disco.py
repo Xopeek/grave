@@ -22,9 +22,6 @@ intents = discord.Intents.default()
 intents.guilds = True
 intents.message_content = True
 
-bot = commands.Bot(command_prefix="!", intents=intents)
-
-
 async def get_first_message(thread: discord.Thread) -> discord.Message | None:
     async for message in thread.history(limit=1, oldest_first=True):
         return message
@@ -55,8 +52,8 @@ def extract_game_start_time(msg: discord.Message | None):
     return None
 
 
-async def sync_games_to_db():
-    forum = await bot.fetch_channel(FORUM_CHANNEL_ID)
+async def sync_games_to_db(bot_client: commands.Bot):
+    forum = await bot_client.fetch_channel(FORUM_CHANNEL_ID)
 
     if not isinstance(forum, discord.ForumChannel):
         return
@@ -85,12 +82,14 @@ async def sync_games_to_db():
 
 
 async def sync_disco():
-    @bot.event
+    bot_client = commands.Bot(command_prefix="!", intents=intents)
+
+    @bot_client.event
     async def on_ready():
         print("Sync games")
         try:
-            await sync_games_to_db()
+            await sync_games_to_db(bot_client)
         finally:
-            await bot.close()
+            await bot_client.close()
 
-    await bot.start(TOKEN)
+    await bot_client.start(TOKEN)
